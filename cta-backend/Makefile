@@ -19,11 +19,11 @@ all: ctaserver
 $(ODIR): 
 	mkdir -p $@
 
-$(ODIR)/%.o: %.cpp $(DEPS) $(ODIR)
+$(ODIR)/%.o: src/%.cpp $(DEPS) $(ODIR)
 	$(CC) $(CFLAGS) -c -o $@ $< 
 
 ctaserver: $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+	$(CC) -o $@ $^ $(LIBS)
 
 .PHONY: clean
 

@@ -4,19 +4,33 @@
  * 
  */
 
+#ifndef __CTA_ERROR_H__
+#define __CTA_ERROR_H__
+
 #include <string>
 
 namespace cta {
 
 class Error {
-    int code;
-    std::string msg;
+public:
+    enum class CODE {
+        ERR_NONE,
+        ERR_PASS,
+        ERR_VALIDATION
+    };
 
-    Error(int code, std::string msg)
+    Error(CODE code, std::string msg)
     : code{code}, msg{msg} {}
 
-    int getCode() const { return code; }
+    CODE getCode() const { return code; }
     std::string getMessage() const { return msg; }
+
+private:
+    CODE code;
+    std::string msg;
+
 };
 
 }
+
+#endif //__CTA_ERROR_H__

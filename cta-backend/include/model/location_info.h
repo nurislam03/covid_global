@@ -1,3 +1,6 @@
+#ifndef __LOCATION_INFO_H__
+#define __LOCATION_INFO_H__
+
 namespace cta {
 
 class LocationInfo final {
@@ -5,3 +8,5 @@ class LocationInfo final {
 };
 
 }
+
+#endif // __LOCATION_INFO_H__
