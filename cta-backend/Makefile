@@ -1,5 +1,5 @@
 
-CC=g++
+CC=g++-8
 CFLAGS=-I. -Iinclude -Iinclude/external --std=c++17 
 
 ODIR=obj
@@ -28,5 +28,5 @@ ctaserver: $(OBJ)
 .PHONY: clean
 
 clean:
-	rm ctaserver
+	rm -f ctaserver
 	rm -rf $(ODIR) 

@@ -16,7 +16,8 @@ public:
     enum class CODE {
         ERR_NONE,
         ERR_PASS,
-        ERR_VALIDATION
+        ERR_VALIDATION,
+        ERR_UNKNOWN
     };
 
     Error(CODE code, std::string msg)
@@ -28,7 +29,6 @@ public:
 private:
     CODE code;
     std::string msg;
-
 };
 
 }

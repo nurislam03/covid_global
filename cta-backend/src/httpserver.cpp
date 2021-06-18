@@ -12,26 +12,13 @@ std::shared_ptr<Error> HTTPServer::Listen(const std::string& addr, int port) {
 
     httplib::Server svr;
 
-    svr.set_logger([](const auto& req, const auto& res) {
-        //std::cout << req << " " << res << std::endl;
-    });
-
-    svr.Post("/search", [](const httplib::Request& req, httplib::Response& res) {
-
-        // TODO: remove these and implement the actual method
-
-        // if (req.has_param("key")) {
-        // auto val = req.get_param_value("key");
-        // std::cout << "param, key: " << val << std::endl;
-        // }
-
-        // std::cout << "body: " << req.body << std::endl;
-        // auto jsn = json::parse(req.body);
-        // std::cout << "json body: " << jsn.dump(2) << std::endl;
-        // res.set_content(jsn.dump(2), "application/json");
+    svr.Post("/search", [this](const httplib::Request& req, httplib::Response& res) {
+        res = HandleRequest(RequestValidator::TYPE::Search, req);
     });
 
     svr.listen(addr.c_str(), port);
+
+    return nullptr;
 }
 
 HTTPResponse HTTPServer::HandleRequest(RequestValidator::TYPE type, const HTTPRequest& req) {
@@ -56,6 +43,8 @@ HTTPResponse HTTPServer::HandleRequest(RequestValidator::TYPE type, const HTTPRe
             return res;
         }
     }
+
+    return res;
 }
 
 }

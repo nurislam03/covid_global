@@ -1,7 +1,7 @@
 # Corona Travel Assistant (cta) backend
 
 ### Prerequisite
-g++ >= 5.5 \
+g++ >= 8.4 \
 c++17 \
 pthread
 

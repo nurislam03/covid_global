@@ -23,6 +23,9 @@ RequestValidator::ValidateRequest(TYPE type, const HTTPRequest& req) {
     case TYPE::RegisterNotification:
         return ValidateRegisterNotificationReuest(req);
     }
+
+    // it is unlikely to reach here, but keeping to make compiler shut up about the retrun statement
+    return std::make_pair<>(nullptr, std::make_shared<Error>(Error::CODE::ERR_UNKNOWN, "Unknown request"));
 }
 
 std::pair<std::shared_ptr<ServiceRequest>, std::shared_ptr<Error>>
