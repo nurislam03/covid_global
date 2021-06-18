@@ -7,6 +7,7 @@
 namespace cta {
 
 class Service {
+public:
     virtual Error* Serve(const ServiceRequest& req) = 0;
 };
 

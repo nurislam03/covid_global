@@ -6,6 +6,10 @@ Error* AuthService::Serve(const ServiceRequest& req) {
     return req.GetServed(*this);
 }
 
+Error* AuthService::Register(const RegistrationRequest& regReq){
+    return nullptr;
+}
+
 Error* AuthService::Login(const LoginRequest& req) {
     return nullptr;
 }

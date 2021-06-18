@@ -10,4 +10,8 @@ Error* CTAService::Search(const SearchRequest& req) {
     return nullptr;
 }
 
+Error* CTAService::RegisterNotification(const RegisterNotificationRequest& req){
+    return nullptr;
+}
+
 }
