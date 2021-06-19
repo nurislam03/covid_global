@@ -3,6 +3,10 @@
 
 namespace cta {
 
+LoginRequest::LoginRequest(const std::string& email, const std::string& password)
+    : email{email}, password{password}
+{}
+
 Error* LoginRequest::GetServed(AuthService& auth) const {
     return auth.Login(*this);
 }

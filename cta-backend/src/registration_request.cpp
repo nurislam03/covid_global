@@ -3,6 +3,10 @@
 
 namespace cta {
 
+RegistrationRequest::RegistrationRequest(const std::string& email, const std::string& password, const std::string name)
+    : email{email}, password{password}, name{name} 
+{}
+
 Error* RegistrationRequest::GetServed(AuthService& auth) const {
     return auth.Register(*this);
 }

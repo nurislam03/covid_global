@@ -3,6 +3,9 @@
 
 namespace cta {
 
+RegisterNotificationRequest::RegisterNotificationRequest(const std::string& sessionID, const std::string& location)
+    : sessionID{sessionID}, location{location} {}
+
 Error* RegisterNotificationRequest::GetServed(AuthService&) const {
     return new Error(Error::CODE::ERR_PASS, "");
 }

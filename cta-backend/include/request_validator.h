@@ -6,6 +6,7 @@
 #include <json/json.hpp>
 #include <error/error.h>
 #include <request/service_request.h>
+#include <result.h>
 
 namespace cta {
 
@@ -24,15 +25,15 @@ public:
         RegisterNotification
     };
 
-    std::pair<std::shared_ptr<ServiceRequest>, std::shared_ptr<Error>> ValidateRequest(TYPE type, const HTTPRequest& req);
+    Result<std::shared_ptr<ServiceRequest>> ValidateRequest(TYPE type, const HTTPRequest& req);
 
 private:
-    std::pair<std::shared_ptr<ServiceRequest>, std::shared_ptr<Error>> ValidateRegistrationReuest(const HTTPRequest& req);
-    std::pair<std::shared_ptr<ServiceRequest>, std::shared_ptr<Error>> ValidateLoginReuest(const HTTPRequest& req);
-    std::pair<std::shared_ptr<ServiceRequest>, std::shared_ptr<Error>> ValidateLogoutReuest(const HTTPRequest& req);
-
-    std::pair<std::shared_ptr<ServiceRequest>, std::shared_ptr<Error>> ValidateSearchReuest(const HTTPRequest& req);
-    std::pair<std::shared_ptr<ServiceRequest>, std::shared_ptr<Error>> ValidateRegisterNotificationReuest(const HTTPRequest& req);
+    Result<std::shared_ptr<ServiceRequest>> ValidateRegistrationReuest(const HTTPRequest& req);
+    Result<std::shared_ptr<ServiceRequest>> ValidateLoginReuest(const HTTPRequest& req);
+    Result<std::shared_ptr<ServiceRequest>> ValidateLogoutReuest(const HTTPRequest& req);
+    
+    Result<std::shared_ptr<ServiceRequest>> ValidateSearchReuest(const HTTPRequest& req);
+    Result<std::shared_ptr<ServiceRequest>> ValidateRegisterNotificationReuest(const HTTPRequest& req);
 };
 
 }

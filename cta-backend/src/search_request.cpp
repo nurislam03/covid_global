@@ -3,6 +3,10 @@
 
 namespace cta {
 
+SearchRequest::SearchRequest(const std::string& location, int offset, int limit)
+    : location{location}, offset{offset}, limit{limit}
+{}
+
 Error* SearchRequest::GetServed(AuthService&) const {
     return new Error(Error::CODE::ERR_PASS, "");
 }

@@ -3,6 +3,9 @@
 
 namespace cta {
 
+LogoutRequest::LogoutRequest(const std::string& sessionID)
+    : sessionID{sessionID} {}
+
 Error* LogoutRequest::GetServed(AuthService& auth) const {
     return auth.Logout(*this);
 }

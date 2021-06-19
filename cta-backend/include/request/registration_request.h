@@ -7,7 +7,13 @@ namespace cta {
 
 struct RegistrationRequest final : public ServiceRequest {
 
-public:
+    std::string email;
+    std::string password;
+    std::string name;
+
+    RegistrationRequest() = default; // default ctor is required by json library
+    RegistrationRequest(const std::string& email, const std::string& password, const std::string name);
+
     Error* GetServed(AuthService& auth) const override;
     Error* GetServed(CTAService& cta) const override;
 };

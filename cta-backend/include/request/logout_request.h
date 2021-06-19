@@ -7,7 +7,11 @@ namespace cta {
 
 struct LogoutRequest final : public ServiceRequest {
 
-public:
+    std::string sessionID;
+
+    LogoutRequest() = default; // default ctor is required by json library
+    LogoutRequest(const std::string& sessionID);
+
     Error* GetServed(AuthService& auth) const override;
     Error* GetServed(CTAService& cta) const override;
 };

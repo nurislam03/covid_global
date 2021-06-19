@@ -8,8 +8,7 @@ namespace cta {
 class AuthService;
 class CTAService;
 
-class ServiceRequest {
-public:
+struct ServiceRequest {
     virtual Error* GetServed(AuthService& auth) const = 0;
     virtual Error* GetServed(CTAService& cta) const = 0;
 };
