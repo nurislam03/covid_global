@@ -2,20 +2,55 @@
 
 namespace cta {
 
-Error* AuthService::Serve(const ServiceRequest& req) {
+std::string gen_random_id() {
+    // TODO: implement
+    return "";
+}
+
+std::string get_hash(const std::string& srt) {
+    // TODO: implement
+    return "";
+}
+
+AuthService::AuthService(std::shared_ptr<Repository> repo)
+    : repo{repo} {}
+
+Result<std::shared_ptr<ServiceResponse>> AuthService::Serve(const ServiceRequest& req) {
     return req.GetServed(*this);
 }
 
-Error* AuthService::Register(const RegistrationRequest& regReq){
-    return nullptr;
+Result<std::shared_ptr<EmptyResponse>> AuthService::Register(const RegistrationRequest& req){
+    return make_result(
+        std::make_shared<EmptyResponse>(),
+        repo->CreateUser(req.email, get_hash(req.password), req.name));
 }
 
-Error* AuthService::Login(const LoginRequest& req) {
-    return nullptr;
+Result<std::shared_ptr<LoginResponse>> AuthService::Login(const LoginRequest& req) {
+    auto [hash, err] = repo->GetPasswordHash(req.email);
+
+    if (err != nullptr) {
+        return make_result(nullptr, err);
+    }
+
+    if (hash != get_hash(req.password)) {
+        return make_result(nullptr, std::make_shared<Error>(
+            Error::CODE::ERR_WRONG_PASSWORD,
+            "Incorrect password"));
+    }
+
+    auto sessionID = gen_random_id();
+    err = repo->StoreSession(req.email, sessionID);
+    if (err != nullptr) {
+        return make_result(nullptr, err);
+    }
+
+    return make_result(std::make_shared<LoginResponse>(sessionID));
 }
 
-Error* AuthService::Logout(const LogoutRequest& req) {
-    return nullptr;
+Result<std::shared_ptr<EmptyResponse>> AuthService::Logout(const LogoutRequest& req) {
+    return make_result(
+        std::make_shared<EmptyResponse>(),
+        repo->RemoveSession(req.sessionID));
 }
 
 }

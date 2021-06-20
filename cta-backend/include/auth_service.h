@@ -11,6 +11,9 @@
 #include <request/logout_request.h>
 #include <request/registration_request.h>
 #include <service.h>
+#include <repository.h>
+#include <response/login_response.h>
+#include <response/empty_response.h>
 
 namespace cta {
 
@@ -19,14 +22,18 @@ class AuthService final : public Service {
     friend class LogoutRequest;
     friend class RegistrationRequest;
 
+    std::shared_ptr<Repository> repo;
+
 public:
-// can be moved to base class
-    Error* Serve(const ServiceRequest& req) override;
+    AuthService(std::shared_ptr<Repository> repo);
+
+    // TODO: check if this method can be moved to base class
+    Result<std::shared_ptr<ServiceResponse>> Serve(const ServiceRequest& req) override;
 
 private:
-    Error* Register(const RegistrationRequest& regReq);
-    Error* Login(const LoginRequest& loginReq);
-    Error* Logout(const LogoutRequest& logoutReq);
+    Result<std::shared_ptr<EmptyResponse>> Register(const RegistrationRequest& regReq);
+    Result<std::shared_ptr<LoginResponse>> Login(const LoginRequest& loginReq);
+    Result<std::shared_ptr<EmptyResponse>> Logout(const LogoutRequest& logoutReq);
 };
 
 }

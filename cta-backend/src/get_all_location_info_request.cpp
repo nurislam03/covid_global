@@ -6,11 +6,11 @@ namespace cta {
 GetAllLocationInfoRequest::GetAllLocationInfoRequest(int offset, int limit)
     : offset{offset}, limit{limit} {}
 
-Error* GetAllLocationInfoRequest::GetServed(AuthService&) const {
-    return new Error(Error::CODE::ERR_PASS, "");
+Result<std::shared_ptr<ServiceResponse>> GetAllLocationInfoRequest::GetServed(AuthService&) const {
+    return make_result(nullptr, std::make_shared<Error>(Error::CODE::ERR_PASS, ""));
 }
 
-Error* GetAllLocationInfoRequest::GetServed(CTAService& cta) const {
+Result<std::shared_ptr<ServiceResponse>> GetAllLocationInfoRequest::GetServed(CTAService& cta) const {
     return cta.GetAllLocationInfo(*this);
 }
 

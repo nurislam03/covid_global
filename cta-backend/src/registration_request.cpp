@@ -7,12 +7,12 @@ RegistrationRequest::RegistrationRequest(const std::string& email, const std::st
     : email{email}, password{password}, name{name} 
 {}
 
-Error* RegistrationRequest::GetServed(AuthService& auth) const {
+Result<std::shared_ptr<ServiceResponse>> RegistrationRequest::GetServed(AuthService& auth) const {
     return auth.Register(*this);
 }
 
-Error* RegistrationRequest::GetServed(CTAService&) const {
-    return new Error(Error::CODE::ERR_PASS, "");
+Result<std::shared_ptr<ServiceResponse>> RegistrationRequest::GetServed(CTAService&) const {
+    return make_result(nullptr, std::make_shared<Error>(Error::CODE::ERR_PASS, ""));
 }
 
 } // namespace cta

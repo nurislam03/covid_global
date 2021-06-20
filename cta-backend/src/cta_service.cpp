@@ -2,20 +2,41 @@
 
 namespace cta {
 
-Error* CTAService::Serve(const ServiceRequest& req) {
+CTAService::CTAService(std::shared_ptr<Repository> repo)
+    : repo{repo} {}
+
+Result<std::shared_ptr<ServiceResponse>> CTAService::Serve(const ServiceRequest& req) {
     return req.GetServed(*this);
 }
 
-Error* CTAService::Search(const SearchRequest& req) {
-    return nullptr;
+Result<std::shared_ptr<SearchResponse>> CTAService::Search(const SearchRequest& req) {
+    auto [info, err] = repo->GetLocationInfo(req.location);
+    if (err != nullptr) {
+        return make_result(nullptr, err);
+    }
+
+    return make_result(std::make_shared<SearchResponse>(info), err);
 }
 
-Error* CTAService::RegisterNotification(const RegisterNotificationRequest& req){
-    return nullptr;
+Result<std::shared_ptr<EmptyResponse>> CTAService::RegisterNotification(const RegisterNotificationRequest& req){
+    auto [email, err] =  repo->GetEmailBySessionID(req.sessionID);
+
+    if (err != nullptr) {
+        return make_result(nullptr, err);
+    }
+
+    return make_result(
+        std::make_shared<EmptyResponse>(),
+        repo->RegisterNotification(email, req.location));
 }
 
-Error* CTAService::GetAllLocationInfo(const GetAllLocationInfoRequest& req) {
-    return nullptr;
+Result<std::shared_ptr<GetAllLocationInfoResponse>> CTAService::GetAllLocationInfo(const GetAllLocationInfoRequest& req) {
+    auto [info, err] = repo->GetAllLocationInfo(req.offset, req.limit);
+    if (err != nullptr) {
+        return make_result(nullptr, err);
+    }
+
+    return make_result(std::make_shared<GetAllLocationInfoResponse>(info), nullptr);
 }
 
 }

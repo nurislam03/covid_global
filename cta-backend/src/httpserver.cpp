@@ -36,12 +36,14 @@ HTTPResponse HTTPServer::HandleRequest(RequestValidator::TYPE type, const HTTPRe
 
     for(auto service: services) {
 
-        // TODO: make Serve method take std::shared_ptr
-        if (service->Serve(*serviceReq) == nullptr) {
+        auto [result, err] = service->Serve(*serviceReq);
+        if (err == nullptr) {
             // TODO: set http response content
             res.status = 200;
             return res;
         }
+
+        // TODO: handle error case
     }
 
     return res;

@@ -17,6 +17,7 @@ public:
         ERR_NONE,
         ERR_PASS,
         ERR_VALIDATION,
+        ERR_WRONG_PASSWORD,
         ERR_UNKNOWN
     };
 
