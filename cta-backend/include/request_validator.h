@@ -22,18 +22,31 @@ public:
         Login,
         Logout,
         Search,
-        RegisterNotification
+        RegisterNotification,
+        GetAllLocationInfo
     };
 
     Result<std::shared_ptr<ServiceRequest>> ValidateRequest(TYPE type, const HTTPRequest& req);
 
 private:
-    Result<std::shared_ptr<ServiceRequest>> ValidateRegistrationReuest(const HTTPRequest& req);
-    Result<std::shared_ptr<ServiceRequest>> ValidateLoginReuest(const HTTPRequest& req);
-    Result<std::shared_ptr<ServiceRequest>> ValidateLogoutReuest(const HTTPRequest& req);
-    
-    Result<std::shared_ptr<ServiceRequest>> ValidateSearchReuest(const HTTPRequest& req);
-    Result<std::shared_ptr<ServiceRequest>> ValidateRegisterNotificationReuest(const HTTPRequest& req);
+    template <typename T>
+    Result<std::shared_ptr<ServiceRequest>> Validate(const HTTPRequest& req) {
+        try{
+        return make_result(
+            std::make_shared<T>(
+                json::parse(req.body).get<T>()
+            )
+        );
+        } catch (std::exception&) {
+            return make_result(
+                nullptr,
+                std::make_shared<Error>(
+                    Error::CODE::ERR_VALIDATION,
+                    R"(parsing error, request body must be json)"
+                )
+            ); 
+        }
+    }
 };
 
 }

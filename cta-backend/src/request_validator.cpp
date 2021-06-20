@@ -4,6 +4,7 @@
 #include <request/logout_request.h>
 #include <request/search_request.h>
 #include <request/register_notification_request.h>
+#include <request/get_all_location_info_request.h>
 #include <json/json.hpp>
 
 
@@ -38,6 +39,15 @@ void from_json(const json& j, RegistrationRequest& rr) {
     j.at("name").get_to(rr.name);
 }
 
+void from_json(const json& j, GetAllLocationInfoRequest& r) {
+    j.at("offset").get_to(r.offset);
+    j.at("limit").get_to(r.limit);
+}
+
+void from_json(const json& j, SearchRequest& sr) {
+    j.at("location").get_to(sr.location);
+}
+
 // -----------------------------
 
 Result<std::shared_ptr<ServiceRequest>>
@@ -45,131 +55,21 @@ RequestValidator::ValidateRequest(TYPE type, const HTTPRequest& req) {
     switch (type)
     {
     case TYPE::Registration:
-        return ValidateRegistrationReuest(req);
+        return Validate<RegistrationRequest>(req);
     case TYPE::Login:
-        return ValidateLoginReuest(req);
+        return Validate<LoginRequest>(req);
     case TYPE::Logout:
-        return ValidateLogoutReuest(req);
+        return Validate<LogoutRequest>(req);
     case TYPE::Search:
-        return ValidateSearchReuest(req);
+        return Validate<SearchRequest>(req);
     case TYPE::RegisterNotification:
-        return ValidateRegisterNotificationReuest(req);
+        return Validate<RegisterNotificationRequest>(req);
+    case TYPE::GetAllLocationInfo:
+        return Validate<GetAllLocationInfoRequest>(req);
     }
 
     // it is unlikely to reach here, but keeping it to make the compiler shut up about the retrun statement
     return make_result(nullptr, std::make_shared<Error>(Error::CODE::ERR_UNKNOWN, "Unknown request"));
-}
-
-Result<std::shared_ptr<ServiceRequest>>
-RequestValidator::ValidateRegistrationReuest(const HTTPRequest& req) {
-    try{
-        return make_result(
-            std::make_shared<RegistrationRequest>(
-                json::parse(req.body).get<RegistrationRequest>()
-            )
-        );
-    } catch (std::exception&) {
-        return make_result(
-            nullptr,
-            std::make_shared<Error>(
-                Error::CODE::ERR_VALIDATION,
-                R"(parsing error, request body must be json)"
-            )
-        ); 
-    }
-}
-
-Result<std::shared_ptr<ServiceRequest>>
-RequestValidator::ValidateLoginReuest(const HTTPRequest& req) {
-    try{
-        return make_result(
-            std::make_shared<LoginRequest>(
-                json::parse(req.body).get<LoginRequest>()
-            )
-        );
-    } catch (std::exception&) {
-        return make_result(
-            nullptr,
-            std::make_shared<Error>(
-                Error::CODE::ERR_VALIDATION,
-                R"(parsing error, request body must be json)"
-            )
-        ); 
-    }
-}
-
-Result<std::shared_ptr<ServiceRequest>>
-RequestValidator::ValidateLogoutReuest(const HTTPRequest& req){
-    try{
-        return make_result(
-            std::make_shared<LogoutRequest>(
-                json::parse(req.body).get<LogoutRequest>()
-            )
-        );
-    } catch (std::exception&) {
-        return make_result(
-            nullptr,
-            std::make_shared<Error>(
-                Error::CODE::ERR_VALIDATION,
-                R"(parsing error, request body must be json)"
-            )
-        ); 
-    }
-}
-
-Result<std::shared_ptr<ServiceRequest>>
-RequestValidator::ValidateSearchReuest(const HTTPRequest& req) {
-    try {
-        auto jsonReq = json::parse(req.body);
-        
-        if(jsonReq.find("location") == jsonReq.end()) {
-            return make_result(
-                nullptr,
-                std::make_shared<Error>(
-                    Error::CODE::ERR_VALIDATION,
-                    R"(missing required field "location")"
-                )
-            );
-        }
-
-        auto location = jsonReq["location"].get<std::string>();
-
-        auto offsetIter = jsonReq.find("offset");
-        auto offset = (offsetIter != jsonReq.end()) ? offsetIter->get<int>() : DEFAULT_SEARCH_OFFSET;
-
-        auto limitIter = jsonReq.find("limit");
-        auto limit = (limitIter != jsonReq.end()) ? limitIter->get<int>() : DEFAULT_SEARCH_LIMIT;
-
-        return make_result(std::make_shared<SearchRequest>(location, offset, limit));
-
-    } catch (std::exception&) {
-        return make_result(
-            nullptr,
-            std::make_shared<Error>(
-                Error::CODE::ERR_VALIDATION,
-                R"(parsing error, request body must be json)"
-            )
-        ); 
-    }
-}
-
-Result<std::shared_ptr<ServiceRequest>>
-RequestValidator::ValidateRegisterNotificationReuest(const HTTPRequest& req) {
-    try{
-        return make_result(
-            std::make_shared<RegisterNotificationRequest>(
-                json::parse(req.body).get<RegisterNotificationRequest>()
-            )
-        );
-    } catch (std::exception&) {
-        return make_result(
-            nullptr,
-            std::make_shared<Error>(
-                Error::CODE::ERR_VALIDATION,
-                R"(parsing error, request body must be json)"
-            )
-        ); 
-    }
 }
 
 }

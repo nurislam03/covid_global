@@ -10,12 +10,14 @@
 #include <service.h>
 #include <request/search_request.h>
 #include <request/register_notification_request.h>
+#include <request/get_all_location_info_request.h>
 
 namespace cta {
 
 class CTAService final : public Service  {
     friend class SearchRequest;
     friend class RegisterNotificationRequest;
+    friend class GetAllLocationInfoRequest;
 
 public:
     Error* Serve(const ServiceRequest& req) override;
@@ -23,6 +25,7 @@ public:
 private:
     Error* Search(const SearchRequest& req);
     Error* RegisterNotification(const RegisterNotificationRequest& req);
+    Error* GetAllLocationInfo(const GetAllLocationInfoRequest& req);
 };
 
 }

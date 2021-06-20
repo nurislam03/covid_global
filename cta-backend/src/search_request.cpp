@@ -3,8 +3,8 @@
 
 namespace cta {
 
-SearchRequest::SearchRequest(const std::string& location, int offset, int limit)
-    : location{location}, offset{offset}, limit{limit}
+SearchRequest::SearchRequest(const std::string& location)
+    : location{location}
 {}
 
 Error* SearchRequest::GetServed(AuthService&) const {

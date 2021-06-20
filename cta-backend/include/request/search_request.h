@@ -8,11 +8,9 @@ namespace cta {
 struct SearchRequest final : public ServiceRequest {
 
     std::string location;
-    int offset;
-    int limit;
 
     SearchRequest() = default; // default ctor is required by json library
-    SearchRequest(const std::string& location, int offset, int limit);
+    SearchRequest(const std::string& location);
 
     Error* GetServed(AuthService& auth) const override;
     Error* GetServed(CTAService& cta) const override;

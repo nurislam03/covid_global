@@ -14,4 +14,8 @@ Error* CTAService::RegisterNotification(const RegisterNotificationRequest& req){
     return nullptr;
 }
 
+Error* CTAService::GetAllLocationInfo(const GetAllLocationInfoRequest& req) {
+    return nullptr;
+}
+
 }
