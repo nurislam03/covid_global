@@ -4,15 +4,17 @@
 #include <memory>
 #include <response/service_response.h>
 #include <model/location_info.h>
+#include <serializable.h>
 
 namespace cta {
 
-struct SearchResponse final : public ServiceResponse {
+struct SearchResponse final : public ServiceResponse, public Serializable {
     std::shared_ptr<LocationInfo> info;
 
     SearchResponse() = default;
     SearchResponse(std::shared_ptr<LocationInfo> info);
 
+    std::string Serialize(Serializer&) const override;
 };
 
 

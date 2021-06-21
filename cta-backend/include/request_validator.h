@@ -32,11 +32,11 @@ private:
     template <typename T>
     Result<std::shared_ptr<ServiceRequest>> Validate(const HTTPRequest& req) {
         try{
-        return make_result(
-            std::make_shared<T>(
-                json::parse(req.body).get<T>()
-            )
-        );
+            return make_result(
+                std::make_shared<T>(
+                    json::parse(req.body).get<T>()
+                )
+            );
         } catch (std::exception&) {
             return make_result(
                 nullptr,

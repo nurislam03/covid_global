@@ -5,15 +5,18 @@
 #include <memory>
 #include <response/service_response.h>
 #include <model/location_info.h>
+#include <serializable.h>
 
 
 namespace cta {
 
-struct GetAllLocationInfoResponse final : public ServiceResponse {
+struct GetAllLocationInfoResponse final : public ServiceResponse, public Serializable {
     std::list<std::shared_ptr<LocationInfo>> info;
 
     GetAllLocationInfoResponse() = default;
     GetAllLocationInfoResponse(std::list<std::shared_ptr<LocationInfo>>& info);
+
+    std::string Serialize(Serializer&) const override;
 };
 
 }

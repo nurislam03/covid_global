@@ -3,14 +3,17 @@
 
 #include <string>
 #include <response/service_response.h>
+#include <serializable.h>
 
 namespace cta {
 
-struct  LoginResponse final : public ServiceResponse {
+struct  LoginResponse final : public ServiceResponse, public Serializable {
     std::string sessionID;
 
     LoginResponse() = default;
     LoginResponse(const std::string& sessionID);
+
+    std::string Serialize(Serializer&) const override;
 };
 
 }
