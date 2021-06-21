@@ -8,13 +8,13 @@
 
 namespace cta {
 
-struct SearchResponse final : public ServiceResponse, public Serializable {
+struct SearchResponse final : public ServiceResponse {
     std::shared_ptr<LocationInfo> info;
 
     SearchResponse() = default;
     SearchResponse(std::shared_ptr<LocationInfo> info);
 
-    std::string Serialize(Serializer&) const override;
+    std::string Serialize(const Serializer&) const override;
 };
 
 

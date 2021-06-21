@@ -7,16 +7,19 @@
 
 namespace cta {
 
-struct  LoginResponse final : public ServiceResponse, public Serializable {
+struct  LoginResponse final : public ServiceResponse {
     std::string sessionID;
+
+    // TODO: add name
+    // TODO: add emmail
+    // TODO: add list of subscription
 
     LoginResponse() = default;
     LoginResponse(const std::string& sessionID);
 
-    std::string Serialize(Serializer&) const override;
+    std::string Serialize(const Serializer&) const override;
 };
 
 }
-
 
 #endif // __LOGIN_RESPONSE_H__

@@ -6,8 +6,8 @@
 
 namespace cta {
 
-struct EmptyResponse final : public ServiceResponse, public Serializable {
-    std::string Serialize(Serializer&) const override;
+struct EmptyResponse final : public ServiceResponse {
+    std::string Serialize(const Serializer&) const override;
 };
 
 }

@@ -22,6 +22,12 @@ Result<std::shared_ptr<EmptyResponse>> CTAService::RegisterNotification(const Re
     auto [email, err] =  repo->GetEmailBySessionID(req.sessionID);
 
     if (err != nullptr) {
+        if(err->getCode() == Error::CODE::ERR_NOTFOUND) {
+            return make_result(nullptr, std::make_shared<Error>(
+                Error::CODE::ERR_UNAUTHORIZED, "Invalid session"
+            ));
+        }
+
         return make_result(nullptr, err);
     }
 

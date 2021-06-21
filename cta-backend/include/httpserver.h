@@ -22,6 +22,8 @@ class HTTPServer final {
     HTTPResponse HandleRequest(RequestValidator::TYPE type, const HTTPRequest& req);
 
 public:
+    // ctor
+    HTTPServer(std::list<std::shared_ptr<Service>>&& services);
 
     std::shared_ptr<Error> Listen(const std::string& addr, int port);
 };

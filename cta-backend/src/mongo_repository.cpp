@@ -22,11 +22,13 @@ std::shared_ptr<Error> MongoRepository::RemoveSession(const std::string& session
     return nullptr;
 }
 
+
+// Should return ERR_NOTFOUND if session does not exist
 Result<std::string> MongoRepository::GetEmailBySessionID(const std::string& sessionID) {
     return make_result(std::string{""}, nullptr);
 }
 
-Result<std::string> MongoRepository::GetPasswordHash(const std::string& userID) {
+Result<std::string> MongoRepository::GetPasswordHash(const std::string& email) {
     return make_result(std::string{""}, nullptr);
 }
 

@@ -1,10 +1,14 @@
 #include <httpserver.h>
 #include <cpp-httplib/httplib.h>
 #include <json/json.hpp>
+#include <json_serializer.h>
+#include <cassert>
 
 namespace cta {
 
-// TODO: refactor this method
+HTTPServer::HTTPServer(std::list<std::shared_ptr<Service>>&& services)
+    : services{services} {}
+
 
 std::shared_ptr<Error> HTTPServer::Listen(const std::string& addr, int port) {
 
@@ -58,7 +62,9 @@ HTTPResponse HTTPServer::HandleRequest(RequestValidator::TYPE type, const HTTPRe
 
         auto [result, err] = service->Serve(*serviceReq);
         if (err == nullptr) {
+            assert(result != nullptr);
             // TODO: set http response content
+            res.set_content(result->Serialize(JsonSerializer{}), "application/json");
             res.status = 200;
             return res;
         }

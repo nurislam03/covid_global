@@ -20,7 +20,7 @@ struct Serializer {
 
 
 struct Serializable {
-    virtual std::string Serialize(Serializer&) const = 0;
+    virtual std::string Serialize(const Serializer&) const = 0;
 };
 
 }

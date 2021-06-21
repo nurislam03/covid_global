@@ -5,7 +5,7 @@ namespace cta {
 GetAllLocationInfoResponse::GetAllLocationInfoResponse(std::list<std::shared_ptr<LocationInfo>>& info)
     : info{info} {}
 
-std::string GetAllLocationInfoResponse::Serialize(Serializer& serializer) const {
+std::string GetAllLocationInfoResponse::Serialize(const Serializer& serializer) const {
     return serializer.Serialize(*this);
 }
 

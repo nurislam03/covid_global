@@ -2,7 +2,7 @@
 
 namespace cta {
 
-std::string EmptyResponse::Serialize(Serializer& serializer) const {
+std::string EmptyResponse::Serialize(const Serializer& serializer) const {
     return serializer.Serialize(*this);
 }
 }

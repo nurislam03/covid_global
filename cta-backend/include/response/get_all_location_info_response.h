@@ -10,13 +10,13 @@
 
 namespace cta {
 
-struct GetAllLocationInfoResponse final : public ServiceResponse, public Serializable {
+struct GetAllLocationInfoResponse final : public ServiceResponse {
     std::list<std::shared_ptr<LocationInfo>> info;
 
     GetAllLocationInfoResponse() = default;
     GetAllLocationInfoResponse(std::list<std::shared_ptr<LocationInfo>>& info);
 
-    std::string Serialize(Serializer&) const override;
+    std::string Serialize(const Serializer&) const override;
 };
 
 }

@@ -18,6 +18,8 @@ public:
         ERR_PASS,
         ERR_VALIDATION,
         ERR_WRONG_PASSWORD,
+        ERR_NOTFOUND,
+        ERR_UNAUTHORIZED,
         ERR_UNKNOWN
     };
 
