@@ -40,6 +40,14 @@ std::shared_ptr<Error> HTTPServer::Listen(const std::string& addr, int port) {
         res = HandleRequest(RequestValidator::TYPE::Registration, req);
     });
 
+    svr.set_exception_handler([](const auto& req, auto& res, std::exception &e) {
+        res.status = 500;
+        auto fmt = "<h1>Error 500</h1><p>%s</p>";
+        char buf[BUFSIZ];
+        snprintf(buf, sizeof(buf), fmt, e.what());
+        res.set_content(buf, "text/html");
+    });
+
     svr.listen(addr.c_str(), port);
 
     return nullptr;
@@ -50,7 +58,7 @@ HTTPResponse HTTPServer::HandleRequest(RequestValidator::TYPE type, const HTTPRe
     
     HTTPResponse res;
 
-    if (err->getCode() == Error::CODE::ERR_VALIDATION) {
+    if (err && err->getCode() == Error::CODE::ERR_VALIDATION) {
         
         res.status = 400;
         return res;

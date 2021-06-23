@@ -16,6 +16,8 @@ class MongoRepository final : public Repository {
     Result<time_t> GetLastNotificationSentTime() override;
     std::shared_ptr<Error> UpdateLastNotificationSentTime() override;
     std::shared_ptr<Error> CreateUser(const std::string& email, const std::string& password, const std::string& name) override;
+    Result<std::list<std::string>> GetSubscriptionsByEmail(const std::string email);
+    Result<std::string> GetNameByEmail(const std::string& email);
 };
 
 

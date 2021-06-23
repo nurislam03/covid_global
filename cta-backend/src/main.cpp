@@ -17,6 +17,8 @@ int main(int argc, char** argv)
 
     cta::HTTPServer server{std::move(services)};
 
+    std::cout << "HTTP server listening on http://localhost:4000" << std::endl;
+
     auto err = server.Listen("localhost", 4000);
     if(err) {
         // TODO: add logger

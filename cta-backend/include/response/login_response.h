@@ -2,6 +2,7 @@
 #define __LOGIN_RESPONSE_H__
 
 #include <string>
+#include <list>
 #include <response/service_response.h>
 #include <serializable.h>
 
@@ -9,13 +10,12 @@ namespace cta {
 
 struct  LoginResponse final : public ServiceResponse {
     std::string sessionID;
+    std::string name;
+    std::string email;
+    std::list<std::string> subscriptions;
 
-    // TODO: add name
-    // TODO: add emmail
-    // TODO: add list of subscription
-
-    LoginResponse() = default;
-    LoginResponse(const std::string& sessionID);
+    LoginResponse(const std::string& name, const std::string& email
+        , const std::string& sessionID, std::list<std::string>&& subscriptions);
 
     std::string Serialize(const Serializer&) const override;
 };

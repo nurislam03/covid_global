@@ -20,10 +20,10 @@ $(ODIR):
 	mkdir -p $@
 
 $(ODIR)/%.o: src/%.cpp $(DEPS) $(ODIR)
-	$(CC) $(CFLAGS) -c -o $@ $< 
+	$(CC) $(CFLAGS) -g -c -o $@ $< 
 
 ctaserver: $(OBJ)
-	$(CC) -o $@ $^ $(LIBS)
+	$(CC) -g -o $@ $^ $(LIBS)
 
 .PHONY: clean
 

@@ -4,7 +4,7 @@
 namespace cta {
 
 namespace logger {
-    
+    // TODO: implement   
 }
 
 } // namespace cta

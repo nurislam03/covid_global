@@ -28,6 +28,8 @@ public:
     virtual Result<time_t> GetLastNotificationSentTime() = 0;
     virtual std::shared_ptr<Error> UpdateLastNotificationSentTime() = 0;
     virtual std::shared_ptr<Error> CreateUser(const std::string& email, const std::string& password, const std::string& name) = 0;
+    virtual Result<std::list<std::string>> GetSubscriptionsByEmail(const std::string email) = 0;
+    virtual Result<std::string> GetNameByEmail(const std::string& email) = 0;
 };
 
 }

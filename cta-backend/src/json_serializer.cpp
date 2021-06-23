@@ -25,7 +25,10 @@ void to_json(json& j, const GetAllLocationInfoResponse& r) {
 
 void to_json(json& j, const LoginResponse& r) {
     j = json{
-        {"sessionID", r.sessionID}
+        {"name", r.name},
+        {"email", r.email},
+        {"sessionID", r.sessionID},
+        {"subscriptions", r.subscriptions}
     };
 }
 
@@ -37,7 +40,7 @@ void to_json(json& j, const SearchResponse& r) {
 
 
 std::string JsonSerializer::Serialize(const GetAllLocationInfoResponse& r) const {
-    return json(r).get<std::string>();
+    return json(r).dump();
 }
 
 std::string JsonSerializer::Serialize(const EmptyResponse&) const {
@@ -45,11 +48,11 @@ std::string JsonSerializer::Serialize(const EmptyResponse&) const {
 }
 
 std::string JsonSerializer::Serialize(const LoginResponse& r) const {
-    return json(r).get<std::string>();
+    return json(r).dump();
 }
 
 std::string JsonSerializer::Serialize(const SearchResponse& r) const {
-    return json(r).get<std::string>();
+    return json(r).dump();
 }
 
 

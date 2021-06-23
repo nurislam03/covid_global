@@ -41,10 +41,23 @@ Result<std::shared_ptr<LoginResponse>> AuthService::Login(const LoginRequest& re
     auto sessionID = gen_random_id();
     err = repo->StoreSession(req.email, sessionID);
     if (err != nullptr) {
-        return make_result(nullptr, err);
+        // TODO: log error
+        return make_result(nullptr, std::make_shared<Error>(Error::CODE::ERR_REPO, "Internal Server"));
     }
 
-    return make_result(std::make_shared<LoginResponse>(sessionID));
+    auto [name, err2] = repo->GetNameByEmail(req.email);
+    if (err != nullptr) {
+        // TODO: log error
+        return make_result(nullptr, std::make_shared<Error>(Error::CODE::ERR_REPO, "Internal Server"));
+    }
+
+    auto [subscriptions, err3] = repo->GetSubscriptionsByEmail(req.email);
+    if (err != nullptr) {
+        // TODO: log error
+        return make_result(nullptr, std::make_shared<Error>(Error::CODE::ERR_REPO, "Internal Server"));
+    }
+
+    return make_result(std::make_shared<LoginResponse>(name, req.email, sessionID, std::move(subscriptions)));
 }
 
 Result<std::shared_ptr<EmptyResponse>> AuthService::Logout(const LogoutRequest& req) {
