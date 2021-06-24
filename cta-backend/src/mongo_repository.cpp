@@ -3,9 +3,39 @@
 
 #include <iostream>
 
+#include <cstdint>
+#include <bsoncxx/json.hpp>
+#include <mongocxx/client.hpp>
+#include <mongocxx/stdx.hpp>
+#include <mongocxx/uri.hpp>
+#include <mongocxx/instance.hpp>
+#include <bsoncxx/builder/stream/helpers.hpp>
+#include <bsoncxx/builder/stream/document.hpp>
+#include <bsoncxx/builder/stream/array.hpp>
+
+
+using bsoncxx::builder::stream::close_array;
+using bsoncxx::builder::stream::close_document;
+using bsoncxx::builder::stream::document;
+using bsoncxx::builder::stream::finalize;
+using bsoncxx::builder::stream::open_array;
+using bsoncxx::builder::stream::open_document;
+
 namespace cta {
 
+MongoRepository::MongoRepository(mongocxx::database&& db) {
 
+}
+
+std::shared_ptr<MongoRepository> MongoRepository::Create(const std::string& connectionURL, const std::string& dbName) {
+    static mongocxx::instance instance{}; // This should be done only once. Hence static
+    mongocxx::uri uri(connectionURL);
+    mongocxx::client client(uri);
+
+    mongocxx::database db = client.database(dbName);
+
+    return std::shared_ptr<MongoRepository>(new MongoRepository(std::move(db)));
+}
 
 Result<std::shared_ptr<LocationInfo>> MongoRepository::GetLocationInfo(const std::string location) {
     std::cout << "MongoRepository::GetLocationInfo is called\n";

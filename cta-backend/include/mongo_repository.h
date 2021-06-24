@@ -1,10 +1,17 @@
 #ifndef __MONGO_REPOSITORY_H__
 #define __MONGO_REPOSITORY_H__
 #include <repository.h>
+#include <mongocxx/database.hpp>
 
 namespace cta {
 
 class MongoRepository final : public Repository {
+
+    MongoRepository(mongocxx::database&&);
+public:
+
+    static std::shared_ptr<MongoRepository> Create(const std::string& connectionURL, const std::string& dbName);
+
     Result<std::shared_ptr<LocationInfo>> GetLocationInfo(const std::string location) override;
     Result<std::list<std::shared_ptr<LocationInfo>>> GetAllLocationInfo(int offset = 0, int limit = 10) override;
     std::shared_ptr<Error> StoreSession(const std::string& email, const std::string& sessionID) override;

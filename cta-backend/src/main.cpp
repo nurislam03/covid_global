@@ -6,10 +6,15 @@
 #include <auth_service.h>
 #include <mongo_repository.h>
 
+// cta-backend
+// "mongodb+srv://cta-backend:cta-backend@mongobookshop.n7agh.mongodb.net/MongoBookShop?retryWrites=true&w=majority"
 
 int main(int argc, char** argv)
 {
-    std::shared_ptr<cta::Repository> repo = std::make_shared<cta::MongoRepository>();
+    std::shared_ptr<cta::Repository> repo = cta::MongoRepository::Create(
+        "mongodb+srv://cta-backend:cta-backend@mongobookshop.n7agh.mongodb.net/MongoBookShop?retryWrites=true&w=majority",
+        "cta-backend"
+    );
 
     std::list<std::shared_ptr<cta::Service>> services { 
         std::make_shared<cta::CTAService>(repo), std::make_shared<cta::AuthService>(repo)

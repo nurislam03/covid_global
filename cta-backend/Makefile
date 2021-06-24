@@ -1,9 +1,15 @@
 
 CC=g++-8
-CFLAGS=-I. -Iinclude -Iinclude/external --std=c++17 
+CFLAGS=-I. -Iinclude -Iinclude/external \
+	-I/usr/local/include/mongocxx/v_noabi \
+	-I/usr/local/include/libmongoc-1.0 \
+	-I/usr/local/include/bsoncxx/v_noabi \
+	-I/usr/local/include/libbson-1.0 \
+	--std=c++17 
+
 
 ODIR=obj
-LIBS=-lpthread
+LIBS=-lpthread -L/usr/local/lib -lmongocxx -lbsoncxx
 
 HDR:=$(shell find . -name '*.h')
 SRC:=$(shell find . -name '*.cpp')
@@ -24,6 +30,9 @@ $(ODIR)/%.o: src/%.cpp $(DEPS) $(ODIR)
 
 ctaserver: $(OBJ)
 	$(CC) -g -o $@ $^ $(LIBS)
+
+run:
+	LD_LIBRARY_PATH=/usr/local/lib ./ctaserver
 
 .PHONY: clean
 
