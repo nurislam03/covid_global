@@ -7,9 +7,9 @@ std::string gen_random_id() {
     return "";
 }
 
-std::string get_hash(const std::string& srt) {
+std::string get_hash(const std::string& str) {
     // TODO: implement
-    return "";
+    return str;
 }
 
 AuthService::AuthService(std::shared_ptr<Repository> repo)

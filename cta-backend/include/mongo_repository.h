@@ -1,13 +1,21 @@
 #ifndef __MONGO_REPOSITORY_H__
 #define __MONGO_REPOSITORY_H__
 #include <repository.h>
+#include <mongocxx/uri.hpp>
+#include <mongocxx/client.hpp>
 #include <mongocxx/database.hpp>
 
 namespace cta {
 
 class MongoRepository final : public Repository {
 
-    MongoRepository(mongocxx::database&&);
+    mongocxx::uri uri;
+    mongocxx::client client;
+    mongocxx::database db;
+
+    // std::shared_ptr<mongocxx::client> client;
+
+    MongoRepository(const std::string& connectionURL, const std::string& dbName);
 public:
 
     static std::shared_ptr<MongoRepository> Create(const std::string& connectionURL, const std::string& dbName);

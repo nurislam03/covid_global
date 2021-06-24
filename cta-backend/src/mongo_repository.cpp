@@ -2,6 +2,7 @@
 #include <string>
 
 #include <iostream>
+#include <cstdio>
 
 #include <cstdint>
 #include <bsoncxx/json.hpp>
@@ -23,18 +24,15 @@ using bsoncxx::builder::stream::open_document;
 
 namespace cta {
 
-MongoRepository::MongoRepository(mongocxx::database&& db) {
 
+MongoRepository::MongoRepository(const std::string& connectionURL, const std::string& dbName)
+    : uri(connectionURL), client(uri), db(client.database(dbName)) 
+{
 }
 
 std::shared_ptr<MongoRepository> MongoRepository::Create(const std::string& connectionURL, const std::string& dbName) {
     static mongocxx::instance instance{}; // This should be done only once. Hence static
-    mongocxx::uri uri(connectionURL);
-    mongocxx::client client(uri);
-
-    mongocxx::database db = client.database(dbName);
-
-    return std::shared_ptr<MongoRepository>(new MongoRepository(std::move(db)));
+    return std::shared_ptr<MongoRepository>(new MongoRepository(connectionURL, dbName));
 }
 
 Result<std::shared_ptr<LocationInfo>> MongoRepository::GetLocationInfo(const std::string location) {
@@ -91,9 +89,25 @@ std::shared_ptr<Error> MongoRepository::UpdateLastNotificationSentTime() {
     return nullptr;
 }
 
-std::shared_ptr<Error> MongoRepository::CreateUser(const std::string& email, const std::string& password, const std::string& name) {
+std::shared_ptr<Error> MongoRepository::CreateUser(const std::string& email, const std::string& passwordHash, const std::string& name) {
     std::cout << "MongoRepository::CreateUser is called\n";
-    return nullptr;
+
+    auto userCollection = db.collection("user");
+
+    auto builder = bsoncxx::builder::stream::document{};
+    bsoncxx::v_noabi::document::value doc_value =
+        builder << "email" << email
+                << "passwordHash" << passwordHash
+                << "name" << name << bsoncxx::builder::stream::finalize;
+
+    auto result = userCollection.insert_one(doc_value.view());
+
+    if (result) {
+        std::cout << "user created with ID: " << result->inserted_id().get_oid().value.to_string() << std::endl;
+        return nullptr;
+    }
+
+    return std::make_shared<Error>(Error::CODE::ERR_UNKNOWN, "Create user failed");
 }
 
 Result<std::list<std::string>> MongoRepository::GetSubscriptionsByEmail(const std::string email) {
