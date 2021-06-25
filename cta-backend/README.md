@@ -3,9 +3,10 @@
 ### Prerequisite
 g++ >= 8.4 \
 c++17 \
-pthread
+pthread \
+mongocxx >= 3.6
 
 ### Build and Run
 Build: `make` \
-Run: `./ctaserver` \
+Run: `make run` \
 Clean: `make clean`
