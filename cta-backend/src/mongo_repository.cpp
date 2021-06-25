@@ -32,7 +32,9 @@ MongoRepository::MongoRepository(const std::string& connectionURL, const std::st
 
 std::shared_ptr<MongoRepository> MongoRepository::Create(const std::string& connectionURL, const std::string& dbName) {
     static mongocxx::instance instance{}; // This should be done only once. Hence static
-    return std::shared_ptr<MongoRepository>(new MongoRepository(connectionURL, dbName));
+    static auto mongoRepo = std::shared_ptr<MongoRepository>(new MongoRepository(connectionURL, dbName));
+    
+    return mongoRepo;
 }
 
 Result<std::shared_ptr<LocationInfo>> MongoRepository::GetLocationInfo(const std::string location) {
@@ -59,14 +61,14 @@ std::shared_ptr<Error> MongoRepository::RemoveSession(const std::string& session
 
 
 // Should return ERR_NOTFOUND if session does not exist
-Result<std::string> MongoRepository::GetEmailBySessionID(const std::string& sessionID) {
+Result<std::string> MongoRepository::GetEmailBySessionID(const std::string& sessionID, const chrono::duration<int> expiryDuration) {
     std::cout << "MongoRepository::GetEmailBySessionID is called\n";
     return make_result(std::string{""}, nullptr);
 }
 
-Result<std::string> MongoRepository::GetPasswordHash(const std::string& email) {
-    std::cout << "MongoRepository::GetPasswordHash is called\n";
-    return make_result(std::string{""}, nullptr);
+Result<std::pair<std::string, int>> MongoRepository::GetPasswordHashAndFailedLoginAttemptCount(const std::string& email) {
+    std::cout << "MongoRepository::GetPasswordHashAndFailedLoginAttemptCount is called\n";
+    return make_result(std::make_pair(std::string{""}, 0), nullptr);
 }
 
 std::shared_ptr<Error> MongoRepository::RegisterNotification(const std::string& email, const std::string& location) {
@@ -79,9 +81,9 @@ Result<std::list<std::shared_ptr<LocationInfo>>> MongoRepository::GetUpdatedLoca
     return make_result(std::list<std::shared_ptr<LocationInfo>>{}, nullptr);
 }
 
-Result<time_t> MongoRepository::GetLastNotificationSentTime() {
+Result<time_point> MongoRepository::GetLastNotificationSentTime() {
     std::cout << "MongoRepository::GetLastNotificationSentTime is called\n";
-    return make_result(time(nullptr), nullptr);
+    return make_result(chrono::system_clock::now(), nullptr);
 }
 
 std::shared_ptr<Error> MongoRepository::UpdateLastNotificationSentTime() {
@@ -118,6 +120,21 @@ Result<std::list<std::string>> MongoRepository::GetSubscriptionsByEmail(const st
 Result<std::string> MongoRepository::GetNameByEmail(const std::string& email) {
     std::cout << "MongoRepository::GetNameByEmail is called\n";
     return make_result("Jon Doe");
+}
+
+Result<bool> MongoRepository::IsEmailAlreadyRegistered(const std::string& email) {
+    std::cout << "MongoRepository::IsEmailAlreadyRegistered is called\n";
+    return make_result(false);
+}
+
+std::shared_ptr<Error> MongoRepository::IncrementFailedLoginAttempt(const std::string& email) {
+    std::cout << "MongoRepository::IncrementFailedLoginAttempt is called\n";
+    return nullptr;
+}
+
+std::shared_ptr<Error> MongoRepository::ResetFailedLoginAttempt(const std::string& email) {
+    std::cout << "MongoRepository::ResetFailedLoginAttempt is called\n";
+    return nullptr;
 }
 
 }

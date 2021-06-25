@@ -21,6 +21,8 @@ public:
         ERR_NOTFOUND,
         ERR_UNAUTHORIZED,
         ERR_REPO,
+        ERR_DUPLICATE_USER,
+        ERR_BLOCKED,
         ERR_UNKNOWN
     };
 

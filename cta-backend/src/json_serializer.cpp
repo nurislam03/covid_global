@@ -55,5 +55,4 @@ std::string JsonSerializer::Serialize(const SearchResponse& r) const {
     return json(r).dump();
 }
 
-
 }

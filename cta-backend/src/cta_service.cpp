@@ -1,6 +1,10 @@
 #include <cta_service.h>
 
+using namespace std::literals;
+
 namespace cta {
+
+const auto SESSION_EXPIRY_DURATION = 15min;
 
 CTAService::CTAService(std::shared_ptr<Repository> repo)
     : repo{repo} {}
@@ -19,7 +23,7 @@ Result<std::shared_ptr<SearchResponse>> CTAService::Search(const SearchRequest& 
 }
 
 Result<std::shared_ptr<EmptyResponse>> CTAService::RegisterNotification(const RegisterNotificationRequest& req){
-    auto [email, err] =  repo->GetEmailBySessionID(req.sessionID);
+    auto [email, err] =  repo->GetEmailBySessionID(req.sessionID, SESSION_EXPIRY_DURATION);
 
     if (err != nullptr) {
         if(err->getCode() == Error::CODE::ERR_NOTFOUND) {

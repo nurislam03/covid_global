@@ -6,6 +6,31 @@
 
 namespace cta {
 
+int errorToHTTPStatusCode(std::shared_ptr<Error> err) {
+    static const std::unordered_map<Error::CODE, int> err2status {
+        {Error::CODE::ERR_NOTFOUND, 404},
+        {Error::CODE::ERR_REPO, 500},
+        {Error::CODE::ERR_UNAUTHORIZED, 401},
+        {Error::CODE::ERR_DUPLICATE_USER, 409},
+        {Error::CODE::ERR_VALIDATION, 400},
+        {Error::CODE::ERR_WRONG_PASSWORD, 403},
+        {Error::CODE::ERR_BLOCKED, 403},
+        {Error::CODE::ERR_UNKNOWN, 500}
+    };
+
+    try {
+        return err2status.at(err->getCode());
+    }
+    catch(const std::out_of_range& ) {
+        // TODO: log exception
+        return 500;
+    }
+    
+    assert(false); // should never reach this statement
+    return 500;
+}
+
+
 HTTPServer::HTTPServer(std::list<std::shared_ptr<Service>>&& services)
     : services{services} {}
 
@@ -41,11 +66,10 @@ std::shared_ptr<Error> HTTPServer::Listen(const std::string& addr, int port) {
     });
 
     svr.set_exception_handler([](const auto& req, auto& res, std::exception &e) {
+        std::cout << "exception at request handler: " << e.what() << std::endl;
+
         res.status = 500;
-        auto fmt = "<h1>Error 500</h1><p>%s</p>";
-        char buf[BUFSIZ];
-        snprintf(buf, sizeof(buf), fmt, e.what());
-        res.set_content(buf, "text/html");
+        res.set_content("Internal server error", "text/plain");
     });
 
     svr.listen(addr.c_str(), port);
@@ -69,15 +93,16 @@ HTTPResponse HTTPServer::HandleRequest(RequestValidator::TYPE type, const HTTPRe
     for(auto service: services) {
 
         auto [result, err] = service->Serve(*serviceReq);
-        if (err == nullptr) {
-            assert(result != nullptr);
-            // TODO: set http response content
-            res.set_content(result->Serialize(JsonSerializer{}), "application/json");
-            res.status = 200;
+        if (err != nullptr) {
+            res.status = errorToHTTPStatusCode(err);
+            res.set_content(err->getMessage(), "text/plain");
             return res;
         }
 
-        // TODO: handle error case
+        assert(result != nullptr);
+        res.set_content(result->Serialize(JsonSerializer{}), "application/json");
+        res.status = 200;
+        return res;
     }
 
     return res;
