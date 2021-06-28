@@ -13,6 +13,7 @@
 #include <bsoncxx/builder/stream/helpers.hpp>
 #include <bsoncxx/builder/stream/document.hpp>
 #include <bsoncxx/builder/stream/array.hpp>
+#include <bson_serializer.h>
 
 
 using bsoncxx::builder::stream::close_array;
@@ -39,7 +40,7 @@ std::shared_ptr<MongoRepository> MongoRepository::Create(const std::string& conn
 
 Result<std::shared_ptr<LocationInfo>> MongoRepository::GetLocationInfo(const std::string location) {
     std::cout << "MongoRepository::GetLocationInfo is called\n";
-    return make_result(std::make_shared<LocationInfo>(), nullptr);
+    return make_result(std::make_shared<LocationInfo>("BGD"), nullptr);
 }
 
 Result<std::list<std::shared_ptr<LocationInfo>>> MongoRepository::GetAllLocationInfo(int offset, int limit) {
@@ -135,6 +136,25 @@ std::shared_ptr<Error> MongoRepository::IncrementFailedLoginAttempt(const std::s
 std::shared_ptr<Error> MongoRepository::ResetFailedLoginAttempt(const std::string& email) {
     std::cout << "MongoRepository::ResetFailedLoginAttempt is called\n";
     return nullptr;
+}
+
+Result<std::shared_ptr<User>> MongoRepository::GetUser(const std::string& email) const {
+    std::cout << "MongoRepository::GetUser is called\n";
+
+    // TODO: get this from db
+    bsoncxx::builder::stream::document builder{};
+    auto doc = builder
+        << "name" << "Bighead"
+        << "email" << "mail@bighead.me"
+        << "passwordHash" << "password"
+        << "failedLoginAttemptCount" << 0 << bsoncxx::builder::stream::finalize;
+    
+    auto err = User().Deserialize(BsonSerializer{}, static_cast<void*>(&doc));
+    if (err != nullptr) {
+        return make_result(nullptr, err);
+    }
+
+    return make_result(std::make_shared<User>());
 }
 
 }

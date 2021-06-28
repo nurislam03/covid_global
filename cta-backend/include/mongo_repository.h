@@ -36,6 +36,8 @@ public:
     Result<bool> IsEmailAlreadyRegistered(const std::string& email) override;
     std::shared_ptr<Error> IncrementFailedLoginAttempt(const std::string& email) override;
     std::shared_ptr<Error> ResetFailedLoginAttempt(const std::string& email) override;
+
+    Result<std::shared_ptr<User>> GetUser(const std::string& email) const override;
 };
 
 }

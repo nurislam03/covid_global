@@ -6,7 +6,7 @@ const int MAX_FAILED_LOGIN_ATTEMPT = 3;
 
 std::string gen_random_id() {
     // TODO: implement
-    return "";
+    return "random1234";
 }
 
 std::string get_hash(const std::string& str) {
@@ -21,7 +21,7 @@ Result<std::shared_ptr<ServiceResponse>> AuthService::Serve(const ServiceRequest
     return req.GetServed(*this);
 }
 
-Result<std::shared_ptr<EmptyResponse>> AuthService::Register(const RegistrationRequest& req){
+Result<std::shared_ptr<EmptyResponse>> AuthService::Register(const RegistrationRequest& req) {
 
     auto [res, err] = repo->IsEmailAlreadyRegistered(req.email);
     if (err != nullptr) {
@@ -38,13 +38,13 @@ Result<std::shared_ptr<EmptyResponse>> AuthService::Register(const RegistrationR
 }
 
 Result<std::shared_ptr<LoginResponse>> AuthService::Login(const LoginRequest& req) {
-    auto [hashAndFailedCount, err] = repo->GetPasswordHashAndFailedLoginAttemptCount(req.email);
+    auto [userPtr, err] = repo->GetUser(req.email);
 
     if (err != nullptr) {
         return make_result(nullptr, err);
     }
 
-    auto [hash, failedcount] = hashAndFailedCount;
+    auto [name, email, hash, failedcount] = *userPtr;
     if (failedcount >= MAX_FAILED_LOGIN_ATTEMPT) {
         return make_result(nullptr, std::make_shared<Error>(
             Error::CODE::ERR_BLOCKED,
@@ -61,28 +61,22 @@ Result<std::shared_ptr<LoginResponse>> AuthService::Login(const LoginRequest& re
     err = repo->StoreSession(req.email, sessionID);
     if (err != nullptr) {
         // TODO: log error
-        return make_result(nullptr, std::make_shared<Error>(Error::CODE::ERR_REPO, "Internal Server Error"));
+        return make_result(nullptr, std::make_shared<Error>(err->getCode(), "Internal Server Error"));
     }
 
-    auto [name, err2] = repo->GetNameByEmail(req.email);
-    if (err != nullptr) {
+    auto [subscriptions, err2] = repo->GetSubscriptionsByEmail(req.email);
+    if (err2 != nullptr) {
         // TODO: log error
-        return make_result(nullptr, std::make_shared<Error>(Error::CODE::ERR_REPO, "Internal Server Error"));
+        return make_result(nullptr, std::make_shared<Error>(err2->getCode(), "Internal Server Error"));
     }
 
-    auto [subscriptions, err3] = repo->GetSubscriptionsByEmail(req.email);
-    if (err != nullptr) {
+    auto err3 = repo->ResetFailedLoginAttempt(email);
+    if (err3 != nullptr) {
         // TODO: log error
-        return make_result(nullptr, std::make_shared<Error>(Error::CODE::ERR_REPO, "Internal Server Error"));
+        return make_result(nullptr, std::make_shared<Error>(err3->getCode(), "Internal Server Error"));
     }
 
-    auto err4 = repo->ResetFailedLoginAttempt(req.email);
-    if (err != nullptr) {
-        // TODO: log error
-        return make_result(nullptr, std::make_shared<Error>(Error::CODE::ERR_REPO, "Internal Server Error"));
-    }
-
-    return make_result(std::make_shared<LoginResponse>(name, req.email, sessionID, std::move(subscriptions)));
+    return make_result(std::make_shared<LoginResponse>(name, email, sessionID, std::move(subscriptions)));
 }
 
 Result<std::shared_ptr<EmptyResponse>> AuthService::Logout(const LogoutRequest& req) {

@@ -23,6 +23,7 @@ public:
         ERR_REPO,
         ERR_DUPLICATE_USER,
         ERR_BLOCKED,
+        ERR_PARSE,
         ERR_UNKNOWN
     };
 

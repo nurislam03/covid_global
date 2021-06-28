@@ -11,11 +11,12 @@
 #include <error/error.h>
 #include <result.h>
 #include <model/location_info.h>
+#include <model/user.h>
+#include <model/subscription_info.h>
+#include <model/session_info.h>
 #include <chrono>
+#include <def.h>
 
-namespace chrono = std::chrono;
-using time_point = chrono::time_point<chrono::system_clock>;
-using duration = chrono::duration<int>;
 
 namespace cta {
 
@@ -38,6 +39,8 @@ public:
     virtual Result<bool> IsEmailAlreadyRegistered(const std::string& email) = 0;
     virtual std::shared_ptr<Error> IncrementFailedLoginAttempt(const std::string& email) = 0;
     virtual std::shared_ptr<Error> ResetFailedLoginAttempt(const std::string& email) = 0;
+
+    virtual Result<std::shared_ptr<User>> GetUser(const std::string& email) const = 0;
 };
 
 }
