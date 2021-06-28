@@ -120,11 +120,38 @@ Result<std::list<std::string>> MongoRepository::GetSubscriptionsByEmail(const st
 
 Result<std::string> MongoRepository::GetNameByEmail(const std::string& email) {
     std::cout << "MongoRepository::GetNameByEmail is called\n";
-    return make_result("Jon Doe");
+
+    auto userCollection = db.collection("user");
+
+    auto builder = bsoncxx::builder::stream::document{};
+    bsoncxx::v_noabi::document::value doc_value =
+        builder << "email" << email << bsoncxx::builder::stream::finalize;
+
+    auto result = userCollection.find_one(doc_value.view()); 
+
+    if (result) {
+        std::cout << "Email already registered: " << bsoncxx::to_json(*result) << std::endl;
+        return make_result(result->name);
+    }
+
+    return make_result("Jon Doe"); // todo: handle error
 }
 
 Result<bool> MongoRepository::IsEmailAlreadyRegistered(const std::string& email) {
     std::cout << "MongoRepository::IsEmailAlreadyRegistered is called\n";
+
+    auto userCollection = db.collection("user");
+
+    auto builder = bsoncxx::builder::stream::document{};
+    bsoncxx::v_noabi::document::value doc_value =
+        builder << "email" << email << bsoncxx::builder::stream::finalize;
+
+    auto result = userCollection.find_one(doc_value.view()); 
+
+    if (result) {
+        std::cout << "Email already registered: " << bsoncxx::to_json(*result) << std::endl;
+        return true;
+    }
     return make_result(false);
 }
 
