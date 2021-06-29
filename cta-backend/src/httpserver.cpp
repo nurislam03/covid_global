@@ -95,6 +95,8 @@ HTTPResponse HTTPServer::HandleRequest(RequestValidator::TYPE type, const HTTPRe
 
         auto [result, err] = service->Serve(*serviceReq);
         if (err != nullptr) {
+            if(err->getCode() == Error::CODE::ERR_PASS) continue;
+
             res.status = errorToHTTPStatusCode(err);
             res.set_content(err->getMessage(), "text/plain"); 
             std::cout << "Handle Request -> 2: " << std::endl; // todo: remove

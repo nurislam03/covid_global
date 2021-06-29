@@ -207,12 +207,14 @@ Result<std::shared_ptr<User>> MongoRepository::GetUser(const std::string& email)
         << "passwordHash" << "abcd"
         << "failedLoginAttemptCount" << 0 << bsoncxx::builder::stream::finalize;
     
-    auto err = User().Deserialize(BsonSerializer{}, static_cast<void*>(&doc));
+    User user;
+
+    auto err = user.Deserialize(BsonSerializer{}, static_cast<void*>(&doc));
     if (err != nullptr) {
         return make_result(nullptr, err);
     }
 
-    return make_result(std::make_shared<User>());
+    return make_result(std::make_shared<User>(user));
 }
 
 }
