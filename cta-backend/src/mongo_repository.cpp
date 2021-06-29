@@ -115,7 +115,38 @@ std::shared_ptr<Error> MongoRepository::CreateUser(const std::string& email, con
 
 Result<std::list<std::string>> MongoRepository::GetSubscriptionsByEmail(const std::string email) {
     std::cout << "MongoRepository::GetSubscriptionsByEmail is called\n";
-    return make_result(std::list<std::string>{});
+
+    auto subscriptionCollection = db.collection("subscription_info");
+
+    using namespace bsoncxx::builder::basic;
+
+    mongocxx::pipeline p{};
+    p.match(make_document(
+        kvp("email", "abc@email.com")
+    ));
+    p.group(make_document(
+        kvp("_id", "$email"),
+        kvp("locations", make_document(kvp("$addToSet", "$location")))
+    ));
+    p.project(make_document(
+        kvp("_id", 0),
+        kvp("locations", 1)
+    ));
+    auto cursor = subscriptionCollection.aggregate(p, mongocxx::options::aggregate{});
+
+    if (cursor.begin() == cursor.end()) {
+        std::cout << "No Subscription found" << std::endl;
+        return make_result(std::list<std::string>{});
+    }
+    auto result_array = (*cursor.begin())["locations"].get_array();
+
+    std:: list <std::string> result_list;
+
+    for(auto r : result_array.value) {
+        result_list.push_back(r.get_value().get_utf8().value.to_string());
+    }
+
+    return make_result(result_list);
 }
 
 Result<std::string> MongoRepository::GetNameByEmail(const std::string& email) {
@@ -131,7 +162,7 @@ Result<std::string> MongoRepository::GetNameByEmail(const std::string& email) {
 
     if (result) {
         std::cout << "Email already registered: " << bsoncxx::to_json(*result) << std::endl;
-        return make_result(result->name);
+        // return make_result(*result.name);
     }
 
     return make_result("Jon Doe"); // todo: handle error
@@ -150,7 +181,7 @@ Result<bool> MongoRepository::IsEmailAlreadyRegistered(const std::string& email)
 
     if (result) {
         std::cout << "Email already registered: " << bsoncxx::to_json(*result) << std::endl;
-        return true;
+        return make_result(true);
     }
     return make_result(false);
 }
@@ -172,8 +203,8 @@ Result<std::shared_ptr<User>> MongoRepository::GetUser(const std::string& email)
     bsoncxx::builder::stream::document builder{};
     auto doc = builder
         << "name" << "Bighead"
-        << "email" << "mail@bighead.me"
-        << "passwordHash" << "password"
+        << "email" << "abc@email.com"
+        << "passwordHash" << "abcd"
         << "failedLoginAttemptCount" << 0 << bsoncxx::builder::stream::finalize;
     
     auto err = User().Deserialize(BsonSerializer{}, static_cast<void*>(&doc));

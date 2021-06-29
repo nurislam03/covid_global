@@ -79,7 +79,8 @@ std::shared_ptr<Error> HTTPServer::Listen(const std::string& addr, int port) {
 
 HTTPResponse HTTPServer::HandleRequest(RequestValidator::TYPE type, const HTTPRequest& req) {
     auto [serviceReq, err] = requestValidator->ValidateRequest(type, req);
-    
+    std::cout << "Handle Request -> 1: " << std::endl;
+
     HTTPResponse res;
 
     if (err && err->getCode() == Error::CODE::ERR_VALIDATION) {
@@ -95,13 +96,16 @@ HTTPResponse HTTPServer::HandleRequest(RequestValidator::TYPE type, const HTTPRe
         auto [result, err] = service->Serve(*serviceReq);
         if (err != nullptr) {
             res.status = errorToHTTPStatusCode(err);
-            res.set_content(err->getMessage(), "text/plain");
+            res.set_content(err->getMessage(), "text/plain"); 
+            std::cout << "Handle Request -> 2: " << std::endl; // todo: remove
+            std::cout << "error: " << static_cast<int> (err->getCode()) << " message: " << err->getMessage() << std::endl;
             return res;
         }
 
         assert(result != nullptr);
         res.set_content(result->Serialize(JsonSerializer{}), "application/json");
         res.status = 200;
+        std::cout << "Handle Request -> 3: " << std::endl; //
         return res;
     }
 
