@@ -11,10 +11,15 @@
 
 int main(int argc, char** argv)
 {
-    std::shared_ptr<cta::Repository> repo = cta::MongoRepository::Create(
+    std::shared_ptr<cta::MongoRepository> repo = cta::MongoRepository::Create(
         "mongodb+srv://cta-backend:cta-backend@mongobookshop.n7agh.mongodb.net/MongoBookShop?retryWrites=true&w=majority",
         "cta-backend"
     );
+
+    if(!repo->Ping()) {
+        std::cout << "DB ping error\n";
+        exit(EXIT_FAILURE);
+    }
 
     std::list<std::shared_ptr<cta::Service>> services { 
         std::make_shared<cta::CTAService>(repo), std::make_shared<cta::AuthService>(repo)

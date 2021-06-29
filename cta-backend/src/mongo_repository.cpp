@@ -10,6 +10,7 @@
 #include <mongocxx/stdx.hpp>
 #include <mongocxx/uri.hpp>
 #include <mongocxx/instance.hpp>
+#include <mongocxx/database.hpp>
 #include <bsoncxx/builder/stream/helpers.hpp>
 #include <bsoncxx/builder/stream/document.hpp>
 #include <bsoncxx/builder/stream/array.hpp>
@@ -22,6 +23,8 @@ using bsoncxx::builder::stream::document;
 using bsoncxx::builder::stream::finalize;
 using bsoncxx::builder::stream::open_array;
 using bsoncxx::builder::stream::open_document;
+
+using namespace bsoncxx::builder::basic;
 
 namespace cta {
 
@@ -36,6 +39,13 @@ std::shared_ptr<MongoRepository> MongoRepository::Create(const std::string& conn
     static auto mongoRepo = std::shared_ptr<MongoRepository>(new MongoRepository(connectionURL, dbName));
     
     return mongoRepo;
+}
+
+bool MongoRepository::Ping() {
+    bsoncxx::document::value command = make_document(kvp("ping", 1));
+    auto res = db.run_command(command.view());
+
+    return res.view()["ok"].get_int32() == 1;
 }
 
 Result<std::shared_ptr<LocationInfo>> MongoRepository::GetLocationInfo(const std::string location) {
@@ -117,8 +127,6 @@ Result<std::list<std::string>> MongoRepository::GetSubscriptionsByEmail(const st
     std::cout << "MongoRepository::GetSubscriptionsByEmail is called\n";
 
     auto subscriptionCollection = db.collection("subscription_info");
-
-    using namespace bsoncxx::builder::basic;
 
     mongocxx::pipeline p{};
     p.match(make_document(
