@@ -5,15 +5,45 @@
 #include <response/login_response.h>
 #include <response/search_response.h>
 #include <model/location_info.h>
+#include <date/date.h>
 
 
 namespace cta {
 
 using json = nlohmann::json;
 
-void to_json(json &j, const std::shared_ptr<LocationInfo>& info) {
+void to_json(json &j, const std::shared_ptr<LocationInfo>& r) {
+
+    using namespace date;
+
     j = json{
-        // TODO: fill this when LocationInfo class is complete
+        {"countryCode", r->countryCode},
+        {"countryName", r->countryName},
+        {"stateName", r->stateName},
+        {"citizenNntry", r->citizenNntry},
+        {"foreignersEntry", r->foreignersEntry},
+        {"tourismStatus", r->tourismStatus},
+        {"quarantineStatus", r->quarantineStatus},
+        {"lockdownStatus", r->lockdownStatus},
+        {"breakingNews", r->breakingNews},
+        {"airlinesUpdate", r->airlinesUpdate},
+        {"entryPolicyForeigners", r->entryPolicyForeigners},
+        {"entryPolicyCitizen", r->entryPolicyCitizen},
+        {"quarantinePolicyForeigners", r->quarantinePolicyForeigners},
+        {"quarantinePolicyCitizen", r->quarantinePolicyCitizen},
+        {"certificationForeigners", r->certificationForeigners},
+        {"certificationCitizen", r->certificationCitizen},
+        {"travelRegulationRestriction", r->travelRegulationRestriction},
+        {"flightRegulationRestriction", r->flightRegulationRestriction},
+        {"totalCase", r->totalCase},
+        {"newCase", r->newCase},
+        {"activeCase", r->activeCase},
+        {"criticalCase", r->criticalCase},
+        {"totalDeaths", r->totalDeaths},
+        {"newDeath", r->newDeath},
+        {"zoneStatus", r->zoneStatus},
+        {"createdDate", format("%D %T %Z\n", floor<std::chrono::milliseconds>(r->createdDate))},
+        {"updatedDate", format("%D %T %Z\n", floor<std::chrono::milliseconds>(r->updatedDate))}
     };
 }
 

@@ -50,7 +50,7 @@ bool MongoRepository::Ping() {
 
 Result<std::shared_ptr<LocationInfo>> MongoRepository::GetLocationInfo(const std::string location) {
     std::cout << "MongoRepository::GetLocationInfo is called\n";
-    return make_result(std::make_shared<LocationInfo>("BGD"), nullptr);
+    return make_result(std::make_shared<LocationInfo>(), nullptr);
 }
 
 Result<std::list<std::shared_ptr<LocationInfo>>> MongoRepository::GetAllLocationInfo(int offset, int limit) {
