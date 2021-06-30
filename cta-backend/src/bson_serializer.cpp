@@ -4,44 +4,73 @@
 #include <model/subscription_info.h>
 #include <model/user.h>
 #include <bsoncxx/builder/stream/document.hpp>
+#include <bsoncxx/document/element.hpp>
+#include <bsoncxx/exception/exception.hpp>
+#include <chrono>
 
 namespace stream = bsoncxx::builder::stream;
 using document = bsoncxx::document::value;
 
 namespace cta {
 
+template <typename T>
+T getValue(bsoncxx::document::view docView, const std::string& fieldName) {
+    //static_assert(false, "implementation not provided");
+    return std::declval<T>();
+}
+
+template <>
+std::string getValue<std::string>(bsoncxx::document::view docView, const std::string& fieldName) {
+    auto elem = docView[fieldName];
+    return elem ? elem.get_utf8().value.to_string() : "";
+}
+
+template <>
+int getValue<int>(bsoncxx::document::view docView, const std::string& fieldName) {
+    auto elem = docView[fieldName];
+    return elem ? static_cast<int>(elem.get_int32()) : -1;
+}
+
+template <>
+std::chrono::system_clock::time_point getValue<std::chrono::system_clock::time_point>(bsoncxx::document::view docView, const std::string& fieldName) {
+    auto elem = docView[fieldName];
+    return elem 
+        ? elem.get_date()
+        : std::chrono::system_clock::time_point();
+}
+
 std::shared_ptr<Error> BsonSerializer::Deserialize(LocationInfo& dst, void* src) const {
     auto docView = static_cast<document*>(src)->view();
 
     try {
-        dst.countryCode = docView["countryCode"].get_utf8().value.to_string(); 
-        dst.countryName = docView["countryName"].get_utf8().value.to_string(); 
-        dst.stateName = docView["stateName"].get_utf8().value.to_string(); 
-        dst.citizenNntry = docView["citizenNntry"].get_utf8().value.to_string(); 
-        dst.foreignersEntry = docView["foreignersEntry"].get_utf8().value.to_string(); 
-        dst.tourismStatus = docView["tourismStatus"].get_utf8().value.to_string(); 
-        dst.quarantineStatus = docView["quarantineStatus"].get_utf8().value.to_string(); 
-        dst.lockdownStatus = docView["lockdownStatus"].get_utf8().value.to_string(); 
-        dst.breakingNews = docView["breakingNews"].get_utf8().value.to_string(); 
-        dst.airlinesUpdate = docView["airlinesUpdate"].get_utf8().value.to_string(); 
-        dst.entryPolicyForeigners = docView["entryPolicyForeigners"].get_utf8().value.to_string(); 
-        dst.entryPolicyCitizen = docView["entryPolicyCitizen"].get_utf8().value.to_string(); 
-        dst.quarantinePolicyForeigners = docView["quarantinePolicyForeigners"].get_utf8().value.to_string(); 
-        dst.quarantinePolicyCitizen = docView["quarantinePolicyCitizen"].get_utf8().value.to_string(); 
-        dst.certificationForeigners = docView["certificationForeigners"].get_utf8().value.to_string(); 
-        dst.certificationCitizen = docView["certificationCitizen"].get_utf8().value.to_string(); 
-        dst.travelRegulationRestriction = docView["travelRegulationRestriction"].get_utf8().value.to_string(); 
-        dst.flightRegulationRestriction = docView["flightRegulationRestriction"].get_utf8().value.to_string(); 
-        dst.zoneStatus = docView["zoneStatus"].get_utf8().value.to_string();
-        dst.totalCase = static_cast<int>(docView["totalCase"].get_int32());
-        dst.newCase = static_cast<int>(docView["newCase"].get_int32());
-        dst.activeCase = static_cast<int>(docView["activeCase"].get_int32());
-        dst.criticalCase = static_cast<int>(docView["criticalCase"].get_int32());
-        dst.totalDeaths = static_cast<int>(docView["totalDeaths"].get_int32());
-        dst.newDeath = static_cast<int>(docView["newDeath"].get_int32());
-        dst.createdDate = docView["createdDate"].get_date();
-        dst.updatedDate = docView["updatedDate"].get_date();
-    } catch (const std::exception& e) {
+        dst.countryCode = getValue<std::string>(docView, "countryCode"); 
+        dst.countryName = getValue<std::string>(docView, "countryName");
+        dst.stateName = getValue<std::string>(docView, "stateName");
+        dst.citizenNntry = getValue<std::string>(docView, "citizenNntry");
+        dst.foreignersEntry = getValue<std::string>(docView, "foreignersEntry");
+        dst.tourismStatus = getValue<std::string>(docView, "tourismStatus");
+        dst.quarantineStatus = getValue<std::string>(docView, "quarantineStatus");
+        dst.lockdownStatus = getValue<std::string>(docView, "lockdownStatus");
+        dst.breakingNews = getValue<std::string>(docView, "breakingNews");
+        dst.airlinesUpdate = getValue<std::string>(docView, "airlinesUpdate");
+        dst.entryPolicyForeigners = getValue<std::string>(docView, "entryPolicyForeigners");
+        dst.entryPolicyCitizen = getValue<std::string>(docView, "entryPolicyCitizen");
+        dst.quarantinePolicyForeigners = getValue<std::string>(docView, "quarantinePolicyForeigners");
+        dst.quarantinePolicyCitizen = getValue<std::string>(docView, "quarantinePolicyCitizen");
+        dst.certificationForeigners = getValue<std::string>(docView, "certificationForeigners");
+        dst.certificationCitizen = getValue<std::string>(docView, "certificationCitizen");
+        dst.travelRegulationRestriction = getValue<std::string>(docView, "travelRegulationRestriction");
+        dst.flightRegulationRestriction = getValue<std::string>(docView, "flightRegulationRestriction");
+        dst.zoneStatus = getValue<std::string>(docView, "zoneStatus");
+        dst.totalCase = getValue<int>(docView, "totalCase");
+        dst.newCase = getValue<int>(docView, "newCase");
+        dst.activeCase = getValue<int>(docView, "activeCase");
+        dst.criticalCase = getValue<int>(docView, "criticalCase");
+        dst.totalDeaths = getValue<int>(docView, "totalDeaths");
+        dst.newDeath = getValue<int>(docView, "newDeath");
+        dst.createdDate = getValue<std::chrono::system_clock::time_point>(docView, "createdDate");
+        dst.updatedDate = getValue<std::chrono::system_clock::time_point>(docView, "updatedDate");
+    } catch (const bsoncxx::exception& e) {
         return std::make_shared<Error>(Error::CODE::ERR_PARSE, e.what());
     }
     

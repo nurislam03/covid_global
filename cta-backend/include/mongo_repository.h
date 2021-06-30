@@ -21,7 +21,7 @@ public:
     static std::shared_ptr<MongoRepository> Create(const std::string& connectionURL, const std::string& dbName);
     bool Ping();
 
-    Result<std::shared_ptr<LocationInfo>> GetLocationInfo(const std::string location) override;
+    Result<std::shared_ptr<LocationInfo>> GetLocationInfo(const std::string& location) override;
     Result<std::list<std::shared_ptr<LocationInfo>>> GetAllLocationInfo(int offset = 0, int limit = 10) override;
     std::shared_ptr<Error> StoreSession(const std::string& email, const std::string& sessionID) override;
     std::shared_ptr<Error> RemoveSession(const std::string& sessionID) override;

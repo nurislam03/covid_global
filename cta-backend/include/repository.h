@@ -23,7 +23,7 @@ namespace cta {
 class Repository {
 
 public:
-    virtual Result<std::shared_ptr<LocationInfo>> GetLocationInfo(const std::string location) = 0;
+    virtual Result<std::shared_ptr<LocationInfo>> GetLocationInfo(const std::string& location) = 0;
     virtual Result<std::list<std::shared_ptr<LocationInfo>>> GetAllLocationInfo(int offset = 0, int limit = 10) = 0;
     virtual std::shared_ptr<Error> StoreSession(const std::string& email, const std::string& sessionID) = 0;
     virtual std::shared_ptr<Error> RemoveSession(const std::string& sessionID) = 0;

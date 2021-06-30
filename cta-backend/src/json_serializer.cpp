@@ -42,8 +42,8 @@ void to_json(json &j, const std::shared_ptr<LocationInfo>& r) {
         {"totalDeaths", r->totalDeaths},
         {"newDeath", r->newDeath},
         {"zoneStatus", r->zoneStatus},
-        {"createdDate", format("%D %T %Z\n", floor<std::chrono::milliseconds>(r->createdDate))},
-        {"updatedDate", format("%D %T %Z\n", floor<std::chrono::milliseconds>(r->updatedDate))}
+        {"createdDate", format("%D %T %Z", floor<std::chrono::milliseconds>(r->createdDate))},
+        {"updatedDate", format("%D %T %Z", floor<std::chrono::milliseconds>(r->updatedDate))}
     };
 }
 

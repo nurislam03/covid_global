@@ -11,6 +11,7 @@
 #include <mongocxx/uri.hpp>
 #include <mongocxx/instance.hpp>
 #include <mongocxx/database.hpp>
+#include <mongocxx/exception/query_exception.hpp>
 #include <bsoncxx/builder/stream/helpers.hpp>
 #include <bsoncxx/builder/stream/document.hpp>
 #include <bsoncxx/builder/stream/array.hpp>
@@ -23,6 +24,7 @@ using bsoncxx::builder::stream::document;
 using bsoncxx::builder::stream::finalize;
 using bsoncxx::builder::stream::open_array;
 using bsoncxx::builder::stream::open_document;
+using mongocxx::query_exception;
 
 using namespace bsoncxx::builder::basic;
 
@@ -48,16 +50,64 @@ bool MongoRepository::Ping() {
     return res.view()["ok"].get_int32() == 1;
 }
 
-Result<std::shared_ptr<LocationInfo>> MongoRepository::GetLocationInfo(const std::string location) {
+Result<std::shared_ptr<LocationInfo>> MongoRepository::GetLocationInfo(const std::string& countryCode) {
     std::cout << "MongoRepository::GetLocationInfo is called\n";
+
+    auto locInfoColl = db["location"];
+
+    auto builder = bsoncxx::builder::stream::document{};
+    bsoncxx::v_noabi::document::value doc_value =
+        builder << "countryCode" << countryCode << bsoncxx::builder::stream::finalize;
+
+    LocationInfo locInfo;
+
+    try {
+        auto result = locInfoColl.find_one(doc_value.view());
+        if(!result) {
+            return make_result(nullptr,
+                std::make_shared<Error>(Error::CODE::ERR_NOTFOUND, "location not found"));
+        }
+
+        locInfo.Deserialize(BsonSerializer{}, std::addressof(*result));
+    } catch (const mongocxx::query_exception& e) {
+        return make_result(nullptr, std::make_shared<Error>(Error::CODE::ERR_REPO, e.what()));
+    }
+
     return make_result(std::make_shared<LocationInfo>(), nullptr);
 }
 
+
+// FIXME: optimize this function, a lot of copying are happening here
 Result<std::list<std::shared_ptr<LocationInfo>>> MongoRepository::GetAllLocationInfo(int offset, int limit) {
     
     std::cout << "MongoRepository::GetAllLocationInfo is called\n";
-    
-    return make_result(std::list<std::shared_ptr<LocationInfo>>{}, nullptr);
+
+        auto locInfoColl = db["location"];
+
+    auto builder = bsoncxx::builder::stream::document{};
+    bsoncxx::v_noabi::document::value doc_value =
+        builder << bsoncxx::builder::stream::finalize;
+
+    std::list<std::shared_ptr<LocationInfo>> locs{};
+
+    try {
+        auto cur = locInfoColl.find(
+            doc_value.view(),
+            mongocxx::options::find()
+                .skip(offset)
+                .limit(limit)
+        );
+
+        for (auto result : cur) {
+            LocationInfo loc;
+            loc.Deserialize(BsonSerializer{}, std::addressof(result));
+            locs.push_back(std::make_shared<LocationInfo>(loc));
+        }
+    } catch (const mongocxx::query_exception& e) {
+        return make_result(std::list<std::shared_ptr<LocationInfo>>{}, std::make_shared<Error>(Error::CODE::ERR_REPO, e.what()));
+    }
+
+    return make_result(locs, nullptr);
 }
 
 std::shared_ptr<Error> MongoRepository::StoreSession(const std::string& email, const std::string& sessionID) {
