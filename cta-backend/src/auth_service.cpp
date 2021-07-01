@@ -1,12 +1,31 @@
 #include <auth_service.h>
+#include <ctime>
+#include <unistd.h>
 
 namespace cta {
 
 const int MAX_FAILED_LOGIN_ATTEMPT = 3;
 
+std::string gen_random(const int len) {
+ 
+    std::string tmp_s;
+    static const char alphanum[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+ 
+    srand( (unsigned) time(NULL) * getpid());
+ 
+    tmp_s.reserve(len);
+ 
+    for (int i = 0; i < len; ++i) 
+        tmp_s += alphanum[rand() % (sizeof(alphanum) - 1)];
+ 
+    return tmp_s;
+}
+
 std::string gen_random_id() {
-    // TODO: implement
-    return "random1234";
+    return gen_random(12);
 }
 
 std::string get_hash(const std::string& str) {

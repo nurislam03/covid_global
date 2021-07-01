@@ -68,12 +68,13 @@ Result<std::shared_ptr<LocationInfo>> MongoRepository::GetLocationInfo(const std
                 std::make_shared<Error>(Error::CODE::ERR_NOTFOUND, "location not found"));
         }
 
-        locInfo.Deserialize(BsonSerializer{}, std::addressof(*result));
+        auto view = result->view();
+        locInfo.Deserialize(BsonSerializer{}, std::addressof(view));
     } catch (const mongocxx::query_exception& e) {
         return make_result(nullptr, std::make_shared<Error>(Error::CODE::ERR_REPO, e.what()));
     }
 
-    return make_result(std::make_shared<LocationInfo>(), nullptr);
+    return make_result(std::make_shared<LocationInfo>(locInfo), nullptr);
 }
 
 
@@ -267,7 +268,8 @@ Result<std::shared_ptr<User>> MongoRepository::GetUser(const std::string& email)
     
     User user;
 
-    auto err = user.Deserialize(BsonSerializer{}, static_cast<void*>(&doc));
+    auto view = doc.view();
+    auto err = user.Deserialize(BsonSerializer{}, static_cast<void*>(&view));
     if (err != nullptr) {
         return make_result(nullptr, err);
     }

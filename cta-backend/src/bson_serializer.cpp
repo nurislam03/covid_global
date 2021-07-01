@@ -8,31 +8,28 @@
 #include <bsoncxx/exception/exception.hpp>
 #include <chrono>
 
-namespace stream = bsoncxx::builder::stream;
-using document = bsoncxx::document::value;
-
 namespace cta {
 
 template <typename T>
-T getValue(bsoncxx::document::view docView, const std::string& fieldName) {
+T getValue(bsoncxx::document::view& docView, const std::string& fieldName) {
     //static_assert(false, "implementation not provided");
     return std::declval<T>();
 }
 
 template <>
-std::string getValue<std::string>(bsoncxx::document::view docView, const std::string& fieldName) {
+std::string getValue<std::string>(bsoncxx::document::view& docView, const std::string& fieldName) {
     auto elem = docView[fieldName];
     return elem ? elem.get_utf8().value.to_string() : "";
 }
 
 template <>
-int getValue<int>(bsoncxx::document::view docView, const std::string& fieldName) {
+int getValue<int>(bsoncxx::document::view& docView, const std::string& fieldName) {
     auto elem = docView[fieldName];
     return elem ? static_cast<int>(elem.get_int32()) : -1;
 }
 
 template <>
-std::chrono::system_clock::time_point getValue<std::chrono::system_clock::time_point>(bsoncxx::document::view docView, const std::string& fieldName) {
+std::chrono::system_clock::time_point getValue<std::chrono::system_clock::time_point>(bsoncxx::document::view& docView, const std::string& fieldName) {
     auto elem = docView[fieldName];
     return elem 
         ? elem.get_date()
@@ -40,7 +37,7 @@ std::chrono::system_clock::time_point getValue<std::chrono::system_clock::time_p
 }
 
 std::shared_ptr<Error> BsonSerializer::Deserialize(LocationInfo& dst, void* src) const {
-    auto docView = static_cast<document*>(src)->view();
+    auto docView = *static_cast<bsoncxx::document::view*>(src);
 
     try {
         dst.countryCode = getValue<std::string>(docView, "countryCode"); 
@@ -78,7 +75,7 @@ std::shared_ptr<Error> BsonSerializer::Deserialize(LocationInfo& dst, void* src)
 }
 
 std::shared_ptr<Error> BsonSerializer::Deserialize(User& dst, void* src) const {
-    auto docView = static_cast<document*>(src)->view();
+    auto docView = *static_cast<bsoncxx::document::view*>(src);
 
     try {
         dst = User{
@@ -95,7 +92,7 @@ std::shared_ptr<Error> BsonSerializer::Deserialize(User& dst, void* src) const {
 }
 
 std::shared_ptr<Error> BsonSerializer::Deserialize(SessionInfo& dst, void* src) const {
-    auto docView = static_cast<document*>(src)->view();
+    auto docView = *static_cast<bsoncxx::document::view*>(src);
 
     try {
         dst = SessionInfo{
@@ -111,7 +108,7 @@ std::shared_ptr<Error> BsonSerializer::Deserialize(SessionInfo& dst, void* src) 
 }
 
 std::shared_ptr<Error> BsonSerializer::Deserialize(SubscriptionInfo& dst, void* src) const {
-    auto docView = static_cast<document*>(src)->view();
+    auto docView = *static_cast<bsoncxx::document::view*>(src);
 
     try {
         dst = SubscriptionInfo{
