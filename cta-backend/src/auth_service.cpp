@@ -1,6 +1,7 @@
 #include <auth_service.h>
 #include <ctime>
 #include <unistd.h>
+#include <hash/picosha2.h>
 
 #include <iostream>
 
@@ -31,8 +32,7 @@ std::string gen_random_id() {
 }
 
 std::string get_hash(const std::string& str) {
-    // TODO: implement
-    return str;
+    return picosha2::hash256_hex_string(str);
 }
 
 AuthService::AuthService(std::shared_ptr<Repository> repo)
@@ -92,10 +92,12 @@ Result<std::shared_ptr<LoginResponse>> AuthService::Login(const LoginRequest& re
         return make_result(nullptr, std::make_shared<Error>(err2->getCode(), "Internal Server Error"));
     }
 
-    auto err3 = repo->ResetFailedLoginAttempt(email);
-    if (err3 != nullptr) {
-        // TODO: log error
-        return make_result(nullptr, std::make_shared<Error>(err3->getCode(), "Internal Server Error"));
+    if(failedcount) {
+        auto err3 = repo->ResetFailedLoginAttempt(email);
+        if (err3 != nullptr) {
+            // TODO: log error
+            return make_result(nullptr, std::make_shared<Error>(err3->getCode(), "Internal Server Error"));
+        }
     }
 
     return make_result(std::make_shared<LoginResponse>(name, email, sessionID, std::move(subscriptions)));

@@ -120,7 +120,7 @@ std::shared_ptr<Error> MongoRepository::StoreSession(const std::string& email, c
     bsoncxx::v_noabi::document::value doc_value =
         builder << "sessionID" << sessionID
                 << "email" << email
-                << "create_time" << std::chrono::system_clock::now()
+                << "create_time" << bsoncxx::types::b_date(std::chrono::system_clock::now())
                 << bsoncxx::builder::stream::finalize;
 
     auto result = sessionCollection.insert_one(doc_value.view()); 
@@ -262,7 +262,7 @@ Result<std::list<std::string>> MongoRepository::GetSubscriptionsByEmail(const st
 
     mongocxx::pipeline p{};
     p.match(make_document(
-        kvp("email", "abc@email.com")
+        kvp("email", email)
     ));
     p.group(make_document(
         kvp("_id", "$email"),
