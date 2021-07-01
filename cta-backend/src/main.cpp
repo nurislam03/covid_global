@@ -5,6 +5,7 @@
 #include <cta_service.h>
 #include <auth_service.h>
 #include <mongo_repository.h>
+#include <email_notifier.h>
 
 // cta-backend
 // "mongodb+srv://cta-backend:cta-backend@mongobookshop.n7agh.mongodb.net/MongoBookShop?retryWrites=true&w=majority"
@@ -20,9 +21,11 @@ int main(int argc, char** argv)
         std::cout << "DB ping error\n";
         exit(EXIT_FAILURE);
     }
+    
+    auto notifier = std::make_shared<cta::EmailNotifier>();
 
     std::list<std::shared_ptr<cta::Service>> services { 
-        std::make_shared<cta::CTAService>(repo), std::make_shared<cta::AuthService>(repo)
+        std::make_shared<cta::CTAService>(repo, notifier), std::make_shared<cta::AuthService>(repo)
     };
 
     cta::HTTPServer server{std::move(services)};

@@ -6,8 +6,8 @@ namespace cta {
 
 const auto SESSION_EXPIRY_DURATION = 15min;
 
-CTAService::CTAService(std::shared_ptr<Repository> repo)
-    : repo{repo} {}
+CTAService::CTAService(std::shared_ptr<Repository> repo, std::shared_ptr<Notifier> notifier)
+    : repo{repo}, notifier{notifier} {}
 
 Result<std::shared_ptr<ServiceResponse>> CTAService::Serve(const ServiceRequest& req) {
     return req.GetServed(*this);
@@ -47,6 +47,13 @@ Result<std::shared_ptr<GetAllLocationInfoResponse>> CTAService::GetAllLocationIn
     }
 
     return make_result(std::make_shared<GetAllLocationInfoResponse>(info), nullptr);
+}
+
+Result<std::shared_ptr<EmptyResponse>> CTAService::NotifySubscriber(const NotifyRequest& req) {
+
+    return make_result(std::make_shared<EmptyResponse>(),
+        notifier->SendNotification("abcd@email.com", "Corona Travel Notification", "Update")
+    );
 }
 
 }
