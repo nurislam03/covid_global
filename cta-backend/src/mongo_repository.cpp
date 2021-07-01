@@ -113,11 +113,42 @@ Result<std::list<std::shared_ptr<LocationInfo>>> MongoRepository::GetAllLocation
 
 std::shared_ptr<Error> MongoRepository::StoreSession(const std::string& email, const std::string& sessionID) {
     std::cout << "MongoRepository::StoreSession is called\n";
+
+    auto sessionCollection = db.collection("session_info");
+
+    auto builder = bsoncxx::builder::stream::document{};
+    bsoncxx::v_noabi::document::value doc_value =
+        builder << "sessionID" << sessionID
+                << "email" << email
+                << "create_time" << std::chrono::system_clock::now()
+                << bsoncxx::builder::stream::finalize;
+
+    auto result = sessionCollection.insert_one(doc_value.view()); 
+
+    if (!result) {
+        return std::make_shared<Error>(Error::CODE::ERR_UNKNOWN, "Store session failed");
+    }
+
+    // std::cout << "Session stored successfully: " << bsoncxx::to_json(*result) << std::endl;
     return nullptr;
 }
 
 std::shared_ptr<Error> MongoRepository::RemoveSession(const std::string& sessionID) {
     std::cout << "MongoRepository::RemoveSession is called\n";
+
+    auto sessionCollection = db.collection("session_info");
+
+    auto builder = bsoncxx::builder::stream::document{};
+    bsoncxx::v_noabi::document::value doc_value =
+        builder << "sessionID" << sessionID << bsoncxx::builder::stream::finalize;
+
+    auto result = sessionCollection.delete_one(doc_value.view()); 
+
+    if (!result) {
+        return std::make_shared<Error>(Error::CODE::ERR_UNKNOWN, "Remove session failed");
+    }
+
+    // std::cout << "Session stored successfully: " << bsoncxx::to_json(*result) << std::endl;
     return nullptr;
 }
 
@@ -125,7 +156,25 @@ std::shared_ptr<Error> MongoRepository::RemoveSession(const std::string& session
 // Should return ERR_NOTFOUND if session does not exist
 Result<std::string> MongoRepository::GetEmailBySessionID(const std::string& sessionID, const chrono::duration<int> expiryDuration) {
     std::cout << "MongoRepository::GetEmailBySessionID is called\n";
-    return make_result(std::string{""}, nullptr);
+
+    auto sessionCollection = db.collection("session_info");
+
+    auto builder = bsoncxx::builder::stream::document{};
+    bsoncxx::v_noabi::document::value doc_value =
+        builder << "sessionID" << sessionID << bsoncxx::builder::stream::finalize;
+
+    auto result = sessionCollection.find_one(doc_value.view()); 
+
+    if (!result) {
+        return make_result(std::string{""}, std::make_shared<Error>(Error::CODE::ERR_NOTFOUND, "Session not found"));
+    }
+
+    // std::cout << "Email found by session ID: " << bsoncxx::to_json(*result) << std::endl;
+    // return make_result(*result.name);
+    SessionInfo ses_inf;
+    auto view = result->view();
+    ses_inf.Deserialize(BsonSerializer{}, &view);
+    return make_result(ses_inf.email);
 }
 
 // Result<std::pair<std::string, int>> MongoRepository::GetPasswordHashAndFailedLoginAttemptCount(const std::string& email) {
@@ -198,12 +247,12 @@ std::shared_ptr<Error> MongoRepository::CreateUser(const std::string& email, con
 
     auto result = userCollection.insert_one(doc_value.view());
 
-    if (result) {
-        std::cout << "user created with ID: " << result->inserted_id().get_oid().value.to_string() << std::endl;
-        return nullptr;
+    if (!result) {
+        return std::make_shared<Error>(Error::CODE::ERR_UNKNOWN, "Create user failed");
     }
 
-    return std::make_shared<Error>(Error::CODE::ERR_UNKNOWN, "Create user failed");
+    // std::cout << "user created with ID: " << result->inserted_id().get_oid().value.to_string() << std::endl;
+    return nullptr;
 }
 
 Result<std::list<std::string>> MongoRepository::GetSubscriptionsByEmail(const std::string email) {
@@ -251,12 +300,15 @@ Result<std::string> MongoRepository::GetNameByEmail(const std::string& email) {
 
     auto result = userCollection.find_one(doc_value.view()); 
 
-    if (result) {
-        std::cout << "Email already registered: " << bsoncxx::to_json(*result) << std::endl;
-        // return make_result(*result.name);
+    if (!result) {
+        return make_result(std::string{}, std::make_shared<Error>(Error::CODE::ERR_NOTFOUND, "Not Found"));
     }
 
-    return make_result("Jon Doe"); // todo: handle error
+    // std::cout << "Name found by Email: " << bsoncxx::to_json(*result) << std::endl;
+    User usr;
+    auto view = result->view();
+    usr.Deserialize(BsonSerializer{}, &view);
+    return make_result(usr.name);
 }
 
 Result<bool> MongoRepository::IsEmailAlreadyRegistered(const std::string& email) {
@@ -270,11 +322,11 @@ Result<bool> MongoRepository::IsEmailAlreadyRegistered(const std::string& email)
 
     auto result = userCollection.find_one(doc_value.view()); 
 
-    if (result) {
-        std::cout << "Email already registered: " << bsoncxx::to_json(*result) << std::endl;
-        return make_result(true);
+    if (!result) {
+        return make_result(false);
     }
-    return make_result(false);
+    // std::cout << "Email already registered: " << bsoncxx::to_json(*result) << std::endl;
+    return make_result(true);
 }
 
 std::shared_ptr<Error> MongoRepository::IncrementFailedLoginAttempt(const std::string& email) {
