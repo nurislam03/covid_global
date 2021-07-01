@@ -128,15 +128,27 @@ Result<std::string> MongoRepository::GetEmailBySessionID(const std::string& sess
     return make_result(std::string{""}, nullptr);
 }
 
-Result<std::pair<std::string, int>> MongoRepository::GetPasswordHashAndFailedLoginAttemptCount(const std::string& email) {
-    std::cout << "MongoRepository::GetPasswordHashAndFailedLoginAttemptCount is called\n";
-    return make_result(std::make_pair(std::string{""}, 0), nullptr);
-}
+// Result<std::pair<std::string, int>> MongoRepository::GetPasswordHashAndFailedLoginAttemptCount(const std::string& email) {
+//     std::cout << "MongoRepository::GetPasswordHashAndFailedLoginAttemptCount is called\n";
+//     return make_result(std::make_pair(std::string{""}, 0), nullptr);
+// }
 
 std::shared_ptr<Error> MongoRepository::RegisterNotification(const std::string& email, const std::string& location) {
     std::cout << "MongoRepository::RegisterNotification is called\n";
+
+    auto result = db["subscription_info"].insert_one(make_document(
+            kvp("email", email),
+            kvp("location", location)
+    ));
+
+    if (!result) {
+        return std::make_shared<Error>(Error::CODE::ERR_REPO, "RegisterNotification failed");
+    }
+
     return nullptr;
 }
+
+// TODO: UnregisterNotification 
 
 Result<std::list<std::shared_ptr<LocationInfo>>> MongoRepository::GetUpdatedLocationInfoSince(time_t time) {
     std::cout << "MongoRepository::GetUpdatedLocationInfoSince is called\n";
@@ -145,11 +157,31 @@ Result<std::list<std::shared_ptr<LocationInfo>>> MongoRepository::GetUpdatedLoca
 
 Result<time_point> MongoRepository::GetLastNotificationSentTime() {
     std::cout << "MongoRepository::GetLastNotificationSentTime is called\n";
-    return make_result(chrono::system_clock::now(), nullptr);
+
+    auto result = db["notification_time_info"].find_one(make_document());
+    if(!result) {
+        return make_result(time_point(),std::make_shared<Error>(Error::CODE::ERR_REPO, "RegisterNotification failed"));
+    }
+
+    auto elem = result->view()["lastSentAt"];
+
+    auto lastSentAt = elem ? elem.get_date() : time_point();
+
+    return make_result(lastSentAt, nullptr);
 }
 
-std::shared_ptr<Error> MongoRepository::UpdateLastNotificationSentTime() {
+std::shared_ptr<Error> MongoRepository::UpdateLastNotificationSentTime(time_point updateTime) {
     std::cout << "MongoRepository::UpdateLastNotificationSentTime is called\n";
+
+    auto result = db["notification_time_info"].update_one(
+        make_document(),
+        make_document(kvp("lastSentAt", bsoncxx::types::b_date(updateTime)))
+    );
+
+    if(!result) {
+        return std::make_shared<Error>(Error::CODE::ERR_REPO, "UpdateLastNotificationSentTime failed");
+    }
+
     return nullptr;
 }
 
@@ -247,11 +279,38 @@ Result<bool> MongoRepository::IsEmailAlreadyRegistered(const std::string& email)
 
 std::shared_ptr<Error> MongoRepository::IncrementFailedLoginAttempt(const std::string& email) {
     std::cout << "MongoRepository::IncrementFailedLoginAttempt is called\n";
+    using bsoncxx::builder::basic::kvp;
+
+    auto result = db["user"].update_one(
+        make_document(kvp("email", email)),
+        make_document(kvp("$inc", make_document(kvp(
+            "failedLoginAttemptCount", 1
+        ))))
+    );
+
+    if (!result) {
+        return std::make_shared<Error>(Error::CODE::ERR_REPO, "IncrementFailedLoginAttempt failed");
+    }
+
     return nullptr;
 }
 
 std::shared_ptr<Error> MongoRepository::ResetFailedLoginAttempt(const std::string& email) {
     std::cout << "MongoRepository::ResetFailedLoginAttempt is called\n";
+
+    using bsoncxx::builder::basic::kvp;
+
+    auto result = db["user"].update_one(
+        make_document(kvp("email", email)),
+        make_document(kvp("$set", make_document(kvp(
+            "failedLoginAttemptCount", 0
+        ))))
+    );
+
+    if (!result) {
+        return std::make_shared<Error>(Error::CODE::ERR_REPO, "ResetFailedLoginAttempt failed");
+    }
+
     return nullptr;
 }
 
@@ -260,16 +319,21 @@ Result<std::shared_ptr<User>> MongoRepository::GetUser(const std::string& email)
 
     // TODO: get this from db
     bsoncxx::builder::stream::document builder{};
-    auto doc = builder
-        << "name" << "Bighead"
-        << "email" << "abc@email.com"
-        << "passwordHash" << "abcd"
-        << "failedLoginAttemptCount" << 0 << bsoncxx::builder::stream::finalize;
+    auto queryDoc = builder
+        << "email" << email << bsoncxx::builder::stream::finalize;
+
+    auto result = db["user"].find_one(queryDoc.view());
+    if(!result) {
+        return make_result(nullptr, std::make_shared<Error>(
+            Error::CODE::ERR_NOTFOUND,
+            "User not found"
+        ));
+    }
     
     User user;
+    auto view = result->view();
+    auto err = user.Deserialize(BsonSerializer{}, std::addressof(view));
 
-    auto view = doc.view();
-    auto err = user.Deserialize(BsonSerializer{}, static_cast<void*>(&view));
     if (err != nullptr) {
         return make_result(nullptr, err);
     }

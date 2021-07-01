@@ -2,6 +2,8 @@
 #include <ctime>
 #include <unistd.h>
 
+#include <iostream>
+
 namespace cta {
 
 const int MAX_FAILED_LOGIN_ATTEMPT = 3;
@@ -71,6 +73,7 @@ Result<std::shared_ptr<LoginResponse>> AuthService::Login(const LoginRequest& re
     }
 
     if (hash != get_hash(req.password)) {
+        repo->IncrementFailedLoginAttempt(email);
         return make_result(nullptr, std::make_shared<Error>(
             Error::CODE::ERR_WRONG_PASSWORD,
             "Incorrect password"));
@@ -99,6 +102,7 @@ Result<std::shared_ptr<LoginResponse>> AuthService::Login(const LoginRequest& re
 }
 
 Result<std::shared_ptr<EmptyResponse>> AuthService::Logout(const LogoutRequest& req) {
+    // TODO: implement
     return make_result(
         std::make_shared<EmptyResponse>(),
         repo->RemoveSession(req.sessionID));

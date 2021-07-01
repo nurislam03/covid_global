@@ -79,10 +79,10 @@ std::shared_ptr<Error> BsonSerializer::Deserialize(User& dst, void* src) const {
 
     try {
         dst = User{
-            docView["name"].get_utf8().value.to_string(),
-            docView["email"].get_utf8().value.to_string(),
-            docView["passwordHash"].get_utf8().value.to_string(),
-            static_cast<int>(docView["failedLoginAttemptCount"].get_int32())
+            getValue<std::string>(docView, "name"),
+            getValue<std::string>(docView, "email"),
+            getValue<std::string>(docView, "passwordHash"),
+            getValue<int>(docView, "failedLoginAttemptCount")
         };
     } catch (const std::exception& e) {
         return std::make_shared<Error>(Error::CODE::ERR_PARSE, e.what());
@@ -96,9 +96,9 @@ std::shared_ptr<Error> BsonSerializer::Deserialize(SessionInfo& dst, void* src) 
 
     try {
         dst = SessionInfo{
-            docView["sessionID"].get_utf8().value.to_string(),
-            docView["email"].get_utf8().value.to_string(),
-            docView["created_at"].get_date()
+            getValue<std::string>(docView, "sessionID"),
+            getValue<std::string>(docView, "email"),
+            getValue<std::chrono::system_clock::time_point>(docView, "createdAt")
         };
     } catch (const std::exception& e) {
         return std::make_shared<Error>(Error::CODE::ERR_PARSE, e.what());
@@ -112,8 +112,8 @@ std::shared_ptr<Error> BsonSerializer::Deserialize(SubscriptionInfo& dst, void* 
 
     try {
         dst = SubscriptionInfo{
-            docView["email"].get_utf8().value.to_string(),
-            docView["location"].get_utf8().value.to_string(),
+            getValue<std::string>(docView, "email"),
+            getValue<std::string>(docView, "location")
         };
     } catch (const std::exception& e) {
         return std::make_shared<Error>(Error::CODE::ERR_PARSE, e.what());
