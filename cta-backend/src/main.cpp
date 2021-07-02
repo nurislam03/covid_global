@@ -25,7 +25,7 @@ int main(int argc, char** argv)
     auto notifier = std::make_shared<cta::EmailNotifier>();
 
     std::list<std::shared_ptr<cta::Service>> services { 
-        std::make_shared<cta::CTAService>(repo, notifier), std::make_shared<cta::AuthService>(repo)
+        std::make_shared<cta::CTAService>(repo, notifier, "http://example.com"), std::make_shared<cta::AuthService>(repo)
     };
 
     cta::HTTPServer server{std::move(services)};

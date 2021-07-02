@@ -197,11 +197,79 @@ std::shared_ptr<Error> MongoRepository::RegisterNotification(const std::string& 
     return nullptr;
 }
 
-// TODO: UnregisterNotification 
+std::shared_ptr<Error> MongoRepository::UnregisterNotification(const std::string& email, const std::string& location) {
+    std::cout << "MongoRepository::UnregisterNotification is called\n";
 
-Result<std::list<std::shared_ptr<LocationInfo>>> MongoRepository::GetUpdatedLocationInfoSince(time_t time) {
-    std::cout << "MongoRepository::GetUpdatedLocationInfoSince is called\n";
-    return make_result(std::list<std::shared_ptr<LocationInfo>>{}, nullptr);
+    auto result = db["subscription_info"].delete_one(make_document(
+            kvp("email", email),
+            kvp("location", location)
+    ));
+
+    if (!result) {
+        return std::make_shared<Error>(Error::CODE::ERR_REPO, "UnregisterNotification failed");
+    }
+
+    return nullptr;
+}
+
+Result<std::list<std::string>> MongoRepository::GetSubscriptionEmailsByLocation(const std::string& location) {
+    std::cout << "MongoRepository::GetSubscriptionEmailsByLocation is called\n";
+ 
+    auto subscriptionCollection = db.collection("subscription_info");
+ 
+    mongocxx::pipeline p{};
+    p.match(make_document(
+        kvp("location", location)
+    ));
+    p.group(make_document(
+        kvp("_id", "$location"),
+        kvp("email", make_document(kvp("$addToSet", "$email")))
+    ));
+    p.project(make_document(
+        kvp("_id", 0),
+        kvp("email", 1)
+    ));
+    auto cursor = subscriptionCollection.aggregate(p, mongocxx::options::aggregate{});
+ 
+    if (cursor.begin() == cursor.end()) {
+        std::cout << "No Subscription email found" << std::endl;
+        return make_result(std::list<std::string>{});
+    }
+    auto result_array = (*cursor.begin())["email"].get_array();
+ 
+    std:: list <std::string> result_list;
+ 
+    for(auto r : result_array.value) {
+        result_list.push_back(r.get_value().get_utf8().value.to_string());
+    }
+ 
+    return make_result(result_list);
+}
+
+
+
+Result<std::list<std::string>> MongoRepository::GetUpdatedCountryCodeSince(std::chrono::system_clock::time_point time) {
+    std::cout << "MongoRepository::GetUpdatedCountryCodeSince is called\n";
+
+    auto cur = db["location"].find(
+        make_document(kvp("updatedDate", make_document(
+            kvp("$gte", bsoncxx::types::b_date(time))
+        ))),
+        mongocxx::options::find().projection(make_document(
+            kvp("_id", 0),
+            kvp("countryCode", 1)
+        ))
+    );
+
+    std::list<std::string> res;
+    for(auto& doc : cur) {
+        auto elem = doc["countryCode"];
+        if(elem) {
+            res.push_back(elem.get_value().get_utf8().value.to_string());
+        }
+    }
+
+    return make_result(res);
 }
 
 Result<time_point> MongoRepository::GetLastNotificationSentTime() {

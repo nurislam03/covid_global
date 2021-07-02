@@ -8,7 +8,7 @@ namespace cta {
 class EmailNotifier final : public Notifier {
 
 public:
-    std::shared_ptr<Error> SendNotification(const std::string& email, const std::string& subject, const std::string& msg) override;
+    std::shared_ptr<Error> SendNotification(const std::list<std::string> email, const std::string& subject, const std::string& msg) override;
 };
 
 }

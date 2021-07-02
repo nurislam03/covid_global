@@ -29,10 +29,11 @@ class CTAService final : public Service  {
 
     std::shared_ptr<Repository> repo;
     std::shared_ptr<Notifier> notifier;
+    std::string frontEndCountryDetailsURL;
 
 public:
 
-    CTAService(std::shared_ptr<Repository> repo, std::shared_ptr<Notifier> notifier);
+    CTAService(std::shared_ptr<Repository> repo, std::shared_ptr<Notifier> notifier, const std::string& frontEndCountryDetailsURL);
 
     Result<std::shared_ptr<ServiceResponse>> Serve(const ServiceRequest& req) override;
 
