@@ -70,9 +70,11 @@ Result<std::shared_ptr<EmptyResponse>> CTAService::NotifySubscriber(const Notify
             continue;
         }
 
+        if(subscribers.size() == 0) continue;
+
         auto URL = frontEndCountryDetailsURL + "/" + country;
         auto subj = "Corona Travel Assistant update for " + country;
-        auto body = "The travel status for " + country + "been updated, please visit "
+        auto body = "The travel status for " + country + " been updated, please visit "
             + URL + "to get the updated information";
 
         err = notifier->SendNotification(subscribers, subj, body);

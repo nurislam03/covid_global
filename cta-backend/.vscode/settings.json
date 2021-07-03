@@ -64,6 +64,7 @@
     "C_Cpp.default.includePath": [
         "/usr/local/include/mongocxx/v_noabi",
         "/usr/local/include/bsoncxx/v_noabi",
+        "/usr/local/include",
         "${workspaceFolder}/include",
         "${workspaceFolder}/include/external"
     ],

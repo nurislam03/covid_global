@@ -24,6 +24,7 @@ public:
         ERR_DUPLICATE_USER,
         ERR_BLOCKED,
         ERR_PARSE,
+        ERR_NOTIFY,
         ERR_UNKNOWN
     };
 

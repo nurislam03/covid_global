@@ -5,7 +5,9 @@
 #include <cta_service.h>
 #include <auth_service.h>
 #include <mongo_repository.h>
-#include <email_notifier.h>
+// #include <email_notifier.h>
+#include <httpnotifier.h>
+#include <crontab.h>
 
 // cta-backend
 // "mongodb+srv://cta-backend:cta-backend@mongobookshop.n7agh.mongodb.net/MongoBookShop?retryWrites=true&w=majority"
@@ -22,17 +24,26 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
     
-    auto notifier = std::make_shared<cta::EmailNotifier>();
+    auto notifier = std::make_shared<cta::HTTPNotifier>("https://ctaemailserver.herokuapp.com");
 
-    std::list<std::shared_ptr<cta::Service>> services { 
-        std::make_shared<cta::CTAService>(repo, notifier, "http://example.com"), std::make_shared<cta::AuthService>(repo)
-    };
+    auto ctaService = std::make_shared<cta::CTAService>(repo, notifier, "http://example.com");
+    auto authService = std::make_shared<cta::AuthService>(repo);
+
+    std::list<std::shared_ptr<cta::Service>> services {ctaService, authService};
+
+    cta::Crontab crontab("0 */1 * * * ?", ctaService);
+
+    auto err = crontab.Start();
+    if (err) {
+        std::cout << err->getMessage() << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
     cta::HTTPServer server{std::move(services)};
 
     std::cout << "HTTP server listening on http://localhost:4000" << std::endl;
 
-    auto err = server.Listen("localhost", 4000);
+    err = server.Listen("localhost", 4000);
     if(err) {
         // TODO: add logger
         std::cout << err->getMessage() << std::endl;

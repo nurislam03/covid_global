@@ -10,7 +10,7 @@ namespace cta {
 class Notifier {
 
 public:
-    virtual std::shared_ptr<Error> SendNotification(const std::list<std::string> email, const std::string& subject, const std::string& msg) = 0;
+    virtual std::shared_ptr<Error> SendNotification(const std::list<std::string>& recipients, const std::string& subject, const std::string& msg) = 0;
 };
 
 }

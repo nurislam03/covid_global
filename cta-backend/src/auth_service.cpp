@@ -46,6 +46,10 @@ Result<std::shared_ptr<EmptyResponse>> AuthService::Register(const RegistrationR
 
     auto [res, err] = repo->IsEmailAlreadyRegistered(req.email);
     if (err != nullptr) {
+        return make_result(nullptr, err);
+    }
+
+    if(res) {
         return make_result(nullptr, std::make_shared<Error>(
             Error::CODE::ERR_DUPLICATE_USER,
             "Another user exists with this email"

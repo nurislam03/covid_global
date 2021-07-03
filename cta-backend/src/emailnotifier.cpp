@@ -5,7 +5,7 @@ namespace cta {
 
 std::shared_ptr<Error> 
 EmailNotifier::SendNotification(
-    const std::list<std::string> email, const std::string& subject, const std::string& msg
+    const std::list<std::string>& recipients, const std::string& subject, const std::string& msg
 ) {
 
     std::cout << "EmailNotifier::SendNotification is called\n";

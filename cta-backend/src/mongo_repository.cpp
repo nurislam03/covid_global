@@ -277,7 +277,7 @@ Result<time_point> MongoRepository::GetLastNotificationSentTime() {
 
     auto result = db["notification_time_info"].find_one(make_document());
     if(!result) {
-        return make_result(time_point(),std::make_shared<Error>(Error::CODE::ERR_REPO, "RegisterNotification failed"));
+        return make_result(time_point(),std::make_shared<Error>(Error::CODE::ERR_REPO, "GetLastNotificationSentTime failed"));
     }
 
     auto elem = result->view()["lastSentAt"];
@@ -292,7 +292,9 @@ std::shared_ptr<Error> MongoRepository::UpdateLastNotificationSentTime(time_poin
 
     auto result = db["notification_time_info"].update_one(
         make_document(),
-        make_document(kvp("lastSentAt", bsoncxx::types::b_date(updateTime)))
+        make_document(kvp("$set", make_document(
+            kvp("lastSentAt", bsoncxx::types::b_date(updateTime))
+        )))
     );
 
     if(!result) {

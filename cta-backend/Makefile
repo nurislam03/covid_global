@@ -5,11 +5,11 @@ CFLAGS=-I. -Iinclude -Iinclude/external \
 	-I/usr/local/include/libmongoc-1.0 \
 	-I/usr/local/include/bsoncxx/v_noabi \
 	-I/usr/local/include/libbson-1.0 \
-	--std=c++17 
+	--std=c++17 -D CPPHTTPLIB_OPENSSL_SUPPORT
 
 
 ODIR=obj
-LIBS=-lpthread -L/usr/local/lib -lmongocxx -lbsoncxx
+LIBS=-lpthread -L/usr/local/lib -lmongocxx -lbsoncxx -lssl -lcrypto
 
 HDR:=$(shell find . -name '*.h')
 SRC:=$(shell find . -name '*.cpp')
