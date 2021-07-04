@@ -82,9 +82,9 @@ int main(int argc, char** argv)
 
     cta::HTTPServer server{std::move(services)};
 
-    std::cout << "HTTP server listening on http://localhost:4000" << std::endl;
+    std::cout << "HTTP server listening on http://0.0.0.0:" << port << std::endl;
 
-    err = server.Listen("localhost", 4000);
+    err = server.Listen("0.0.0.0", port);
     if(err) {
         // TODO: add logger
         std::cout << err->getMessage() << std::endl;
