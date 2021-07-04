@@ -10,6 +10,7 @@
 #include <service.h>
 #include <request/search_request.h>
 #include <request/register_notification_request.h>
+#include <request/unregister_notification_request.h>
 #include <request/get_all_location_info_request.h>
 #include <request/notify_request.h>
 #include <repository.h>
@@ -21,9 +22,10 @@
 
 namespace cta {
 
-class CTAService final : public Service  {
+class CTAService final : public Service {
     friend class SearchRequest;
     friend class RegisterNotificationRequest;
+    friend class UnRegisterNotificationRequest;
     friend class GetAllLocationInfoRequest;
     friend class NotifyRequest;
 
@@ -40,6 +42,7 @@ public:
 private:
     Result<std::shared_ptr<SearchResponse>> Search(const SearchRequest& req);
     Result<std::shared_ptr<EmptyResponse>> RegisterNotification(const RegisterNotificationRequest& req);
+    Result<std::shared_ptr<EmptyResponse>> UnRegisterNotification(const UnRegisterNotificationRequest& req);
     Result<std::shared_ptr<GetAllLocationInfoResponse>> GetAllLocationInfo(const GetAllLocationInfoRequest& req);
     Result<std::shared_ptr<EmptyResponse>> NotifySubscriber(const NotifyRequest& req);
 };

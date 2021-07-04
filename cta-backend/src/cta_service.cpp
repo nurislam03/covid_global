@@ -41,6 +41,24 @@ Result<std::shared_ptr<EmptyResponse>> CTAService::RegisterNotification(const Re
         repo->RegisterNotification(email, req.location));
 }
 
+Result<std::shared_ptr<EmptyResponse>> CTAService::UnRegisterNotification(const UnRegisterNotificationRequest& req) {
+    auto [email, err] =  repo->GetEmailBySessionID(req.sessionID, SESSION_EXPIRY_DURATION);
+
+    if (err != nullptr) {
+        if(err->getCode() == Error::CODE::ERR_NOTFOUND) {
+            return make_result(nullptr, std::make_shared<Error>(
+                Error::CODE::ERR_UNAUTHORIZED, "Invalid session"
+            ));
+        }
+
+        return make_result(nullptr, err);
+    }
+
+    return make_result(
+        std::make_shared<EmptyResponse>(),
+        repo->UnregisterNotification(email, req.location));
+}
+
 Result<std::shared_ptr<GetAllLocationInfoResponse>> CTAService::GetAllLocationInfo(const GetAllLocationInfoRequest& req) {
     auto [info, err] = repo->GetAllLocationInfo(req.offset, req.limit);
     if (err != nullptr) {

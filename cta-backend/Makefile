@@ -1,5 +1,5 @@
 
-CC=g++-8
+CC=g++
 CFLAGS=-I. -Iinclude -Iinclude/external \
 	-I/usr/local/include/mongocxx/v_noabi \
 	-I/usr/local/include/libmongoc-1.0 \

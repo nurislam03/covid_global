@@ -1,0 +1,16 @@
+version: "3.2"
+
+
+services: 
+    cta-backend:
+        build:
+            context: .
+        ports: 
+            - 4050:4000
+        # environment:
+        #     - DB_CONNECTION_URL="mongodb+srv://cta-backend:cta-backend@mongobookshop.n7agh.mongodb.net/MongoBookShop?retryWrites=true&w=majority"
+        #     - DB_NAME='cta-backend'
+        #     - NOTIFICATION_SERVER_URL='https://ctaemailserver.herokuapp.com'
+        #     - NOTIFICATION_CRONTAB='0 */1 * * * ?'
+        #     - SERVER_PORT=4050
+        #     - FRONTEND_DETAILS_PAGE_URL='https://example.com'

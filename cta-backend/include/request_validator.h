@@ -23,6 +23,7 @@ public:
         Logout,
         Search,
         RegisterNotification,
+        UnRegisterNotification,
         GetAllLocationInfo
     };
 

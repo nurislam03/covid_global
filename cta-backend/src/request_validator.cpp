@@ -5,6 +5,7 @@
 #include <request/search_request.h>
 #include <request/register_notification_request.h>
 #include <request/get_all_location_info_request.h>
+#include <request/unregister_notification_request.h>
 #include <json/json.hpp>
 
 
@@ -31,6 +32,11 @@ void from_json(const json& j, LoginRequest& lr) {
 void from_json(const json& j, RegisterNotificationRequest& rnr) {
     j.at("sessionID").get_to(rnr.sessionID);
     j.at("location").get_to(rnr.location);
+}
+
+void from_json(const json& j, UnRegisterNotificationRequest& r) {
+    j.at("sessionID").get_to(r.sessionID);
+    j.at("location").get_to(r.location);
 }
 
 void from_json(const json& j, RegistrationRequest& rr) {
@@ -64,6 +70,8 @@ RequestValidator::ValidateRequest(TYPE type, const HTTPRequest& req) {
         return Validate<SearchRequest>(req);
     case TYPE::RegisterNotification:
         return Validate<RegisterNotificationRequest>(req);
+    case TYPE::UnRegisterNotification:
+        return Validate<UnRegisterNotificationRequest>(req);
     case TYPE::GetAllLocationInfo:
         return Validate<GetAllLocationInfoRequest>(req);
     }

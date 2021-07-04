@@ -53,6 +53,10 @@ std::shared_ptr<Error> HTTPServer::Listen(const std::string& addr, int port) {
         res = HandleRequest(RequestValidator::TYPE::RegisterNotification, req);
     });
 
+    svr.Post("/unregisternotification", [this](const httplib::Request& req, httplib::Response& res) {
+        res = HandleRequest(RequestValidator::TYPE::UnRegisterNotification, req);
+    });
+
     svr.Post("/login", [this](const httplib::Request& req, httplib::Response& res) {
         res = HandleRequest(RequestValidator::TYPE::Login, req);
     });
