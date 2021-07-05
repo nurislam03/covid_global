@@ -38,12 +38,12 @@ private:
                     json::parse(req.body).get<T>()
                 )
             );
-        } catch (std::exception&) {
+        } catch (const std::exception& e) {
             return make_result(
                 nullptr,
                 std::make_shared<Error>(
                     Error::CODE::ERR_VALIDATION,
-                    R"(parsing error, request body must be json)"
+                    std::string("parsing error, request body must be json: ") + e.what() 
                 )
             ); 
         }

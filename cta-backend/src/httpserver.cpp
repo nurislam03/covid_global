@@ -41,6 +41,10 @@ std::shared_ptr<Error> HTTPServer::Listen(const std::string& addr, int port) {
 
     httplib::Server svr;
 
+    svr.Options(R"(/.*)", [&](const auto& req, auto& res) {
+        res.status = 200;
+    });
+
     svr.Post("/", [this](const httplib::Request& req, httplib::Response& res) {
         res = HandleRequest(RequestValidator::TYPE::GetAllLocationInfo, req);
     });
@@ -69,6 +73,14 @@ std::shared_ptr<Error> HTTPServer::Listen(const std::string& addr, int port) {
         res = HandleRequest(RequestValidator::TYPE::Registration, req);
     });
 
+    svr.set_post_routing_handler([](const auto& req, auto& res) {
+        res.set_header("Access-Control-Allow-Methods", " POST, GET, OPTIONS");
+        res.set_header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Accept");
+        res.set_header("Access-Control-Allow-Origin", "*");
+        res.set_header("Connection", "close");
+    });
+
+
     svr.set_exception_handler([](const auto& req, auto& res, std::exception &e) {
         std::cout << "exception at request handler: " << e.what() << std::endl;
 
@@ -82,6 +94,9 @@ std::shared_ptr<Error> HTTPServer::Listen(const std::string& addr, int port) {
 }
 
 HTTPResponse HTTPServer::HandleRequest(RequestValidator::TYPE type, const HTTPRequest& req) {
+    
+    std::cout << "request received of type: " << static_cast<int>(type) << std::endl;
+    
     auto [serviceReq, err] = requestValidator->ValidateRequest(type, req);
 
     HTTPResponse res;
@@ -89,6 +104,9 @@ HTTPResponse HTTPServer::HandleRequest(RequestValidator::TYPE type, const HTTPRe
     if (err && err->getCode() == Error::CODE::ERR_VALIDATION) {
         
         res.status = 400;
+        res.set_content(err->getMessage(), "text/plain");
+
+        std::cout << "Handle Request error: " << static_cast<int> (err->getCode()) << " message: " << err->getMessage() << std::endl;
         return res;
     }
 
