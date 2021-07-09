@@ -3,6 +3,7 @@
 #include <repository.h>
 #include <mongocxx/uri.hpp>
 #include <mongocxx/client.hpp>
+#include <mongocxx/pool.hpp>
 #include <mongocxx/database.hpp>
 
 namespace cta {
@@ -10,12 +11,14 @@ namespace cta {
 class MongoRepository final : public Repository {
 
     mongocxx::uri uri;
-    mongocxx::client client;
-    mongocxx::database db;
+    mongocxx::pool pool;
+    std::string dbName;
 
-    // std::shared_ptr<mongocxx::client> client;
 
     MongoRepository(const std::string& connectionURL, const std::string& dbName);
+    mongocxx::database getDB();
+    mongocxx::collection getCollection(const std::string& name);
+
 public:
 
     static std::shared_ptr<MongoRepository> Create(const std::string& connectionURL, const std::string& dbName);
@@ -43,7 +46,7 @@ public:
     Result<bool> IsEmailAlreadyRegistered(const std::string& email) override;
     std::shared_ptr<Error> IncrementFailedLoginAttempt(const std::string& email) override;
     std::shared_ptr<Error> ResetFailedLoginAttempt(const std::string& email) override;
-    Result<std::shared_ptr<User>> GetUser(const std::string& email) const override;
+    Result<std::shared_ptr<User>> GetUser(const std::string& email) override;
 };
 
 }

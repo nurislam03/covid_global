@@ -51,7 +51,7 @@ public:
     virtual Result<bool> IsEmailAlreadyRegistered(const std::string& email) = 0;
     virtual std::shared_ptr<Error> IncrementFailedLoginAttempt(const std::string& email) = 0;
     virtual std::shared_ptr<Error> ResetFailedLoginAttempt(const std::string& email) = 0;
-    virtual Result<std::shared_ptr<User>> GetUser(const std::string& email) const = 0;
+    virtual Result<std::shared_ptr<User>> GetUser(const std::string& email) = 0;
 };
 
 }
