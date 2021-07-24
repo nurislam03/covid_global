@@ -11,7 +11,7 @@ export default function Search() {
   const [thiscountries, setthisCountries] = useState([])
 
   const handelChange = (value) => {
-    let temp = value ? countries.filter(x => x.countryName === value.countryName) : countries
+    let temp = value ? countries1.filter(x => x.countryName === value.countryName) : countries
     setthisCountries(temp)
   }
 

@@ -12,7 +12,7 @@ export const getCountriesService = async () => {
 
         let response = await api.post('/', body)
         if (response.data)
-            return response = { data:response.data.info  }
+            return response = { data: countries1 }
     } catch (error) {
 
         return { data: countries1 }
